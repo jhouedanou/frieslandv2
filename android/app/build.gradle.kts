@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.friesland.dashboard.friesland_dashboard"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     // NDK completely disabled
 
     compileOptions {
@@ -24,8 +24,9 @@ android {
         applicationId = "com.friesland.dashboard.friesland_dashboard"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 24
+        targetSdk = 36
+        compileSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         

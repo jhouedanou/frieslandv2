@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../constants/app_constants.dart';
@@ -208,7 +209,7 @@ class AppDatabase {
       'table_name': tableName,
       'record_id': recordId,
       'operation': operation,
-      'data': data.toString(),
+      'data': jsonEncode(data), // Properly encode JSON
       'created_at': DateTime.now().millisecondsSinceEpoch,
     });
   }
@@ -262,6 +263,152 @@ class AppDatabase {
     }
     
     return stats;
+  }
+
+  // Additional sync methods
+  Future<List<Map<String, dynamic>>> getUnsyncedData() async {
+    final db = await database;
+    return await getSyncQueue();
+  }
+
+  Future<void> markAsSynced(String tableName, String recordId) async {
+    final db = await database;
+    await db.update(
+      tableName,
+      {'is_synced': 1, 'updated_at': DateTime.now().millisecondsSinceEpoch},
+      where: '${tableName == 'visites' ? 'visite_id' : tableName == 'pdv' ? 'pdv_id' : 'merchandiser_id'} = ?',
+      whereArgs: [recordId],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedVisites() async {
+    final db = await database;
+    return await db.query(
+      'visites',
+      where: 'is_synced = ?',
+      whereArgs: [0],
+      orderBy: 'created_at ASC',
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getUnsyncedPDVs() async {
+    final db = await database;
+    return await db.query(
+      'pdv',
+      where: 'is_synced = ?',
+      whereArgs: [0],
+      orderBy: 'created_at ASC',
+    );
+  }
+
+  Future<void> clearSyncQueue() async {
+    final db = await database;
+    await db.delete('sync_queue');
+  }
+
+  Future<int> getSyncQueueCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM sync_queue');
+    return result.first['count'] as int;
+  }
+
+  // Preference storage for sync settings
+  Future<void> setLastSyncTimestamp(DateTime timestamp) async {
+    final db = await database;
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS app_preferences (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      )
+    ''');
+    
+    await db.insert(
+      'app_preferences',
+      {
+        'key': 'last_sync_timestamp',
+        'value': timestamp.toIso8601String(),
+        'updated_at': DateTime.now().millisecondsSinceEpoch,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<DateTime?> getLastSyncTimestamp() async {
+    final db = await database;
+    try {
+      final result = await db.query(
+        'app_preferences',
+        where: 'key = ?',
+        whereArgs: ['last_sync_timestamp'],
+      );
+      
+      if (result.isNotEmpty) {
+        return DateTime.parse(result.first['value'] as String);
+      }
+    } catch (e) {
+      // Table might not exist yet
+      print('Error getting last sync timestamp: $e');
+    }
+    return null;
+  }
+
+  Future<void> deleteVisite(String visiteId) async {
+    final db = await database;
+    await db.delete('visites', where: 'visite_id = ?', whereArgs: [visiteId]);
+  }
+
+  Future<void> deletePDV(String pdvId) async {
+    final db = await database;
+    await db.delete('pdv', where: 'pdv_id = ?', whereArgs: [pdvId]);
+  }
+
+  // Utility method to insert or update visite based on existence
+  Future<void> insertOrUpdateVisite(Map<String, dynamic> visite) async {
+    final db = await database;
+    final existing = await db.query(
+      'visites',
+      where: 'visite_id = ?',
+      whereArgs: [visite['visite_id']],
+    );
+
+    if (existing.isNotEmpty) {
+      visite['updated_at'] = DateTime.now().millisecondsSinceEpoch;
+      await db.update(
+        'visites',
+        visite,
+        where: 'visite_id = ?',
+        whereArgs: [visite['visite_id']],
+      );
+    } else {
+      visite['created_at'] = DateTime.now().millisecondsSinceEpoch;
+      visite['updated_at'] = DateTime.now().millisecondsSinceEpoch;
+      await db.insert('visites', visite);
+    }
+  }
+
+  // Utility method to insert or update PDV based on existence
+  Future<void> insertOrUpdatePDV(Map<String, dynamic> pdv) async {
+    final db = await database;
+    final existing = await db.query(
+      'pdv',
+      where: 'pdv_id = ?',
+      whereArgs: [pdv['pdv_id']],
+    );
+
+    if (existing.isNotEmpty) {
+      pdv['updated_at'] = DateTime.now().millisecondsSinceEpoch;
+      await db.update(
+        'pdv',
+        pdv,
+        where: 'pdv_id = ?',
+        whereArgs: [pdv['pdv_id']],
+      );
+    } else {
+      pdv['created_at'] = DateTime.now().millisecondsSinceEpoch;
+      pdv['updated_at'] = DateTime.now().millisecondsSinceEpoch;
+      await db.insert('pdv', pdv);
+    }
   }
 
   Future<void> close() async {

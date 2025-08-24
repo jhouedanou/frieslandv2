@@ -6,25 +6,44 @@ import '../models/pdv_model.dart';
 import '../../core/constants/app_constants.dart';
 
 abstract class ApiDataSource {
+  // Authentication
+  Future<Map<String, dynamic>> login(String email, String password, String deviceName);
+  Future<void> logout();
+  void setAuthToken(String token);
+  
+  // Visits
   Future<List<VisiteModel>> getVisites();
   Future<List<VisiteModel>> getVisitesByCommercial(String commercial);
   Future<VisiteModel> createVisite(VisiteModel visite);
   Future<VisiteModel> updateVisite(VisiteModel visite);
   Future<void> deleteVisite(String visiteId);
   
+  // PDVs  
   Future<List<PDVModel>> getPDVs();
   Future<List<PDVModel>> getPDVsBySecteur(String secteur);
   Future<List<PDVModel>> getNearbyPDVs(double lat, double lng, {double radius = 5000});
   
+  // Analytics
   Future<Map<String, dynamic>> getDashboardAnalytics();
   Future<Map<String, dynamic>> getCommercialStats(String commercial);
+  
+  // Sync
+  Future<Map<String, dynamic>> checkSync({String? lastSync});
+  Future<Map<String, dynamic>> downloadUpdates({String? lastSync, List<String>? dataTypes});
+  Future<Map<String, dynamic>> uploadData(Map<String, dynamic> data);
+  
+  // Geofences
+  Future<Map<String, dynamic>> checkGeofence(double lat, double lng, {String? pdvId});
+  Future<void> enterGeofence(String pdvId, double lat, double lng);
+  Future<void> exitGeofence(String pdvId, double lat, double lng);
 }
 
 class ApiDataSourceImpl implements ApiDataSource {
   late final Dio _dio;
   final String baseUrl;
 
-  ApiDataSourceImpl({this.baseUrl = 'http://localhost:3000/api/v1'}) {
+  // Support Docker environment with dashboard API
+  ApiDataSourceImpl({this.baseUrl = 'http://dashboard:80/api/v1'}) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 30),
@@ -63,6 +82,115 @@ class ApiDataSourceImpl implements ApiDataSource {
         throw Exception(message);
       },
     ));
+  }
+
+  @override
+  Future<Map<String, dynamic>> login(String email, String password, String deviceName) async {
+    try {
+      final response = await _dio.post('/auth/login', data: {
+        'email': email,
+        'password': password,
+        'device_name': deviceName,
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await _dio.post('/auth/logout');
+    } catch (e) {
+      throw Exception('Erreur de déconnexion: $e');
+    }
+  }
+
+  @override
+  void setAuthToken(String token) {
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+
+  @override
+  Future<Map<String, dynamic>> checkSync({String? lastSync}) async {
+    try {
+      final response = await _dio.get('/sync/check', queryParameters: {
+        if (lastSync != null) 'last_sync': lastSync,
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('Erreur de vérification sync: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> downloadUpdates({String? lastSync, List<String>? dataTypes}) async {
+    try {
+      final response = await _dio.get('/sync/download', queryParameters: {
+        if (lastSync != null) 'last_sync': lastSync,
+        if (dataTypes != null) 'data_types': dataTypes,
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('Erreur de téléchargement sync: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> uploadData(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/sync/upload', data: {
+        'data': data,
+        'device_id': 'flutter-app',
+        'sync_timestamp': DateTime.now().toIso8601String(),
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('Erreur d\'upload sync: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> checkGeofence(double lat, double lng, {String? pdvId}) async {
+    try {
+      final response = await _dio.post('/geofences/check', data: {
+        'latitude': lat,
+        'longitude': lng,
+        if (pdvId != null) 'pdv_id': pdvId,
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('Erreur de vérification géofence: $e');
+    }
+  }
+
+  @override
+  Future<void> enterGeofence(String pdvId, double lat, double lng) async {
+    try {
+      await _dio.post('/geofences/enter', data: {
+        'pdv_id': pdvId,
+        'latitude': lat,
+        'longitude': lng,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      throw Exception('Erreur entrée géofence: $e');
+    }
+  }
+
+  @override
+  Future<void> exitGeofence(String pdvId, double lat, double lng) async {
+    try {
+      await _dio.post('/geofences/exit', data: {
+        'pdv_id': pdvId,
+        'latitude': lat,
+        'longitude': lng,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      throw Exception('Erreur sortie géofence: $e');
+    }
   }
 
   @override

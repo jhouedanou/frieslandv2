@@ -1,72 +1,74 @@
-# Friesland Dashboard - Application de Gestion des Visites Commerciales
+# Friesland V2 - Application de Gestion des Visites Commerciales
 
-Application Flutter complète pour la gestion des visites commerciales Friesland Bonnet Rouge avec dashboard temps réel et contrôles géofencing avancés.
+Solution complète avec Dashboard Laravel et Application Flutter pour la gestion des visites commerciales Friesland. Architecture backend + frontend avec synchronisation hors-ligne complète et fonctionnalités géofencing avancées.
 
 ## 🚀 Fonctionnalités Principales
 
-### 📊 Dashboard Temps Réel
-- **KPI en temps réel** : Visites, PDV actifs, prix respectés, alertes
-- **Graphiques interactifs** : Présence produits par catégorie (EVAP, IMP, SCM, UHT, YOGHURT)
-- **Performance commerciaux** : Suivi individuel et comparatif
-- **Alertes automatiques** : Ruptures stock, prix non respectés
+### 🖥️ Dashboard Laravel (Backend)
+- **API REST complète** : Authentification, PDVs, visites, analytics
+- **Panel administrateur Filament** : Gestion complète des données
+- **Synchronisation hors-ligne** : Gestion intelligente des conflits
+- **Géofencing backend** : Validation des positions, logs d'activité
+- **Analytics temps réel** : KPIs, rapports, exports
+- **Gestion des utilisateurs** : Rôles et permissions
 
-### 📍 Géofencing Avancé
-- **Validation proximité PDV** : Rayon 300m obligatoire
-- **Précision GPS minimum** : 10m pour validation
-- **Contrôles zone assignée** : Validation merchandiser
-- **Notifications push** : Entrée périmètre, rappels visites
+### 📱 Application Flutter (Frontend)
+- **Mode hors-ligne complet** : SQLite local + synchronisation intelligente
+- **Géofencing avancé** : Validation automatique des positions PDV
+- **Interface moderne** : Design system Friesland
+- **Formulaires de visite** : Produits Peak, Three Crowns, Friso
+- **Cartes interactives** : PDV avec zones géofencing
+- **Photos et signatures** : Capture et synchronisation
 
-### 📋 Formulaire de Visite Détaillé
-- **Section EVAP** : 7 produits (BR Gold, BR 160g, BRB 160g, BR 400g, BRB 400g, Pearl 400g)
-- **Section IMP** : 8 produits (BR 400g, BR 900g, BR 2.5Kg, BR 375g, BRB 400g, BR 20g, BRB 25g)
-- **Section SCM** : 6 produits (BR 1Kg, BRB 1Kg, BRB 397g, BR 397g, Pearl 1Kg)
-- **Sections UHT/YOGHURT** : Présence et prix
-- **Statuts standardisés** : "Disponible, Prix respecté", "En rupture", etc.
-
-### 🗺️ Carte Interactive
-- **Visualisation PDV** : Markers colorés par type et performance
-- **Zones géofencing** : Affichage rayons 300m
-- **Filtres avancés** : Par type PDV, secteur, commercial
-- **Navigation GPS** : Itinéraires vers PDV
-
-### 💾 Stockage Hybride
-- **SQLite local** : Fonctionnement hors-ligne complet
-- **Firebase sync** : Synchronisation temps réel
-- **Queue de sync** : Reprise automatique des données
+### 🔄 Synchronisation Hors-Ligne
+- **Fonctionnement 100% offline** : Toutes les fonctions disponibles
+- **Sync automatique** : Dès que la connexion est rétablie
+- **Gestion des conflits** : Résolution intelligente
+- **Queue de synchronisation** : Garantit aucune perte de données
+- **Synchronisation différentielle** : Transfert optimisé
 
 ## 🏗️ Architecture Technique
 
-### Clean Architecture
+### Architecture Globale
 ```
-lib/
-├── core/                    # Utilitaires, constantes, services
-│   ├── constants/          # Constantes application
-│   ├── database/           # Base SQLite
-│   ├── services/           # Géofencing, sync
-│   ├── themes/             # Thème UI Bonnet Rouge
-│   └── utils/              # Dependency injection
-├── data/                   # Couche données
-│   ├── datasources/        # Firebase, SQLite
-│   ├── models/             # Modèles JSON
-│   └── repositories/       # Implémentations repo
-├── domain/                 # Logique métier
-│   ├── entities/           # Entités métier
-│   ├── repositories/       # Interfaces repo
-│   └── usecases/           # Cas d'usage
-└── presentation/           # Interface utilisateur
-    ├── bloc/               # State management
-    ├── pages/              # Écrans principaux
-    └── widgets/            # Widgets réutilisables
+Friesland V2/
+├── dashboard/              # Backend Laravel
+│   ├── app/
+│   │   ├── Http/Controllers/Api/    # Contrôleurs API REST
+│   │   ├── Models/                  # Modèles Eloquent
+│   │   └── Filament/               # Interface admin
+│   ├── database/migrations/        # Schémas BDD
+│   └── routes/api.php             # Routes API
+├── lib/                    # Frontend Flutter
+│   ├── core/
+│   │   ├── database/              # SQLite local
+│   │   ├── services/              # Auth, sync, settings
+│   │   └── constants/             # Config app
+│   ├── data/
+│   │   ├── datasources/           # API + local
+│   │   ├── models/                # Modèles données
+│   │   └── repositories/          # Implémentations
+│   ├── domain/                    # Logique métier
+│   └── presentation/              # UI Flutter
+└── docker-compose-full.yml       # Environnement complet
 ```
 
-### Technologies Utilisées
+### Stack Technique
+
+#### Backend (Laravel)
+- **Laravel 10** : Framework PHP moderne
+- **PostgreSQL** : Base de données relationnelle
+- **Laravel Sanctum** : Authentification API
+- **Filament** : Panel administrateur
+- **Docker** : Conteneurisation
+
+#### Frontend (Flutter)
 - **Flutter 3.0+** : Framework mobile cross-platform
-- **Firebase** : Backend temps réel (Firestore, Auth, Storage)
-- **SQLite** : Base données locale
-- **BLoC/Provider** : Gestion d'état
+- **SQLite** : Base données locale (sqflite)
+- **Dio** : Client HTTP pour API
+- **Provider/BLoC** : Gestion d'état
 - **flutter_map** : Cartes interactives
 - **geolocator** : GPS et géofencing
-- **fl_chart** : Graphiques analytics
 
 ## 📱 Écrans Principaux
 
@@ -76,42 +78,72 @@ lib/
 4. **Liste Visites** : Historique, filtres, recherche
 5. **Profil** : Stats personnelles, sync, export
 
-## 🔧 Configuration
+## 🚀 Installation et Configuration
 
-### Prérequis
-- Flutter SDK 3.0+
-- Android Studio / Xcode
-- Compte Firebase
-- API Keys Google Maps
+### 🐋 Démarrage rapide avec Docker
 
-### Installation
+#### Prérequis
+- Docker & Docker Compose
+- Git
+
+#### Installation complète
 ```bash
 # Clone du repository
 git clone [repository-url]
 cd frieslandv2
 
-# Installation des dépendances
+# Démarrage de l'environnement complet
+./start-development.sh
+
+# Test de l'intégration
+./test-integration.sh
+```
+
+#### Accès aux services
+- **API Dashboard** : http://localhost/api/v1
+- **Interface Admin** : http://localhost (Filament)
+- **Base de données** : localhost:5432 (postgres/password)
+- **Adminer** : http://localhost:8081
+
+### 📱 Développement Flutter
+
+#### Prérequis
+- Flutter SDK 3.0+
+- Android Studio / Xcode (pour émulateurs)
+- API Keys Google Maps
+
+#### Configuration
+```bash
+# Installation des dépendances Flutter
 flutter pub get
 
-# Génération des modèles
-flutter packages pub run build_runner build
+# Configuration de l'API (Docker)
+# L'app est préconfigurée pour utiliser http://dashboard:80/api/v1
+# En développement local, modifier dans lib/data/datasources/api_datasource.dart
 
-# Configuration Firebase
-# Ajouter google-services.json (Android)
-# Ajouter GoogleService-Info.plist (iOS)
-
-# Run application
+# Run application (avec backend Docker en cours)
 flutter run
 ```
 
-### Variables d'environnement
-```dart
-// lib/core/config/environment.dart
-class Environment {
-  static const String firebaseProjectId = 'friesland-dashboard';
-  static const String googleMapsApiKey = 'YOUR_MAPS_API_KEY';
-}
+### 🔧 Variables d'environnement
+
+#### Dashboard Laravel (.env)
+```bash
+APP_ENV=local
+DB_CONNECTION=pgsql
+DB_HOST=postgres
+DB_DATABASE=friesland_dashboard
+DB_USERNAME=postgres
+DB_PASSWORD=password
 ```
+
+#### Flutter (lib/core/constants/app_constants.dart)
+```dart
+class AppConstants {
+  static const String apiBaseUrl = 'http://dashboard:80/api/v1';
+  static const String googleMapsApiKey = 'YOUR_MAPS_API_KEY';
+  static const bool enableOfflineMode = true;
+}
 
 ## 📊 Modèle de Données
 

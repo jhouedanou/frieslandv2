@@ -154,12 +154,16 @@ class SyncService {
 
   Future<void> _syncServerToLocal() async {
     try {
+      // Obtenir le timestamp de la dernière synchronisation
+      final lastSync = await _localDb.getLastSyncTimestamp();
+      
       // Synchroniser les PDVs depuis le serveur
       _syncProgress('Synchronisation des PDV...');
       final pdvs = await _apiDataSource.getPDVs();
       
       for (final pdv in pdvs) {
-        await _localDb.insertPDV(pdv.toFirestore());
+        await _localDb.insertOrUpdatePDV(pdv.toFirestore());
+        await _localDb.markAsSynced('pdv', pdv.pdvId);
       }
       
       // Synchroniser les visites récentes
@@ -167,8 +171,12 @@ class SyncService {
       final visites = await _apiDataSource.getVisites();
       
       for (final visite in visites) {
-        await _localDb.insertVisite(visite.toFirestore());
+        await _localDb.insertOrUpdateVisite(visite.toFirestore());
+        await _localDb.markAsSynced('visites', visite.visiteId);
       }
+      
+      // Mettre à jour le timestamp de synchronisation
+      await _localDb.setLastSyncTimestamp(DateTime.now());
       
     } catch (e) {
       throw Exception('Erreur synchronisation serveur->local: $e');

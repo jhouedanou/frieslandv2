@@ -1,0 +1,39 @@
+FROM php:8.2-apache
+
+# Installation des extensions PHP nécessaires
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpq-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    zip \
+    && apt-get clean
+
+# Installation de Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Configuration Apache
+RUN a2enmod rewrite
+COPY apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+
+# Répertoire de travail
+WORKDIR /var/www/html
+
+# Copie des fichiers
+COPY . .
+
+# Installation des dépendances
+RUN composer install --no-dev --optimize-autoloader
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage
+
+EXPOSE 80
+
+CMD ["apache2-foreground"]

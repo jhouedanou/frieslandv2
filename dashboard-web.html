@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friesland CRM Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bonnet-rouge': '#E53E3E',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100">
+    <!-- Header avec logo Bonnet Rouge -->
+    <header class="bg-bonnet-rouge text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <h1 class="text-2xl font-bold">🏢 Friesland CRM Dashboard</h1>
+            <p class="text-red-100">Gestion des visites commerciales Bonnet Rouge</p>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Statut de connexion -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🔗 État des services</h2>
+            <div class="space-y-2">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
+                    <span>API Backend: </span>
+                    <span id="api-status" class="font-mono text-sm ml-2">Vérification...</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-blue-500 rounded-full mr-3"></span>
+                    <span>App Flutter: "Friesland CRM" installée sur device A015</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3">📱 Application Mobile</h3>
+                <p class="text-gray-600 mb-4">App "Friesland CRM" avec logo Bonnet Rouge</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>✅ Installée sur Android A015</li>
+                    <li>✅ OpenStreetMap intégré</li>
+                    <li>✅ Mode hors-ligne</li>
+                    <li>✅ GPS/Géofencing</li>
+                </ul>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3">🔌 API REST</h3>
+                <p class="text-gray-600 mb-4">Backend Laravel avec routes complètes</p>
+                <div class="space-y-2 text-sm">
+                    <button onclick="testAPI('/health')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs">
+                        Test Health
+                    </button>
+                    <button onclick="testAPI('/api/v1/pdvs')" class="bg-green-500 text-white px-3 py-1 rounded text-xs">
+                        Test PDVs
+                    </button>
+                    <button onclick="testAPI('/api/v1/products')" class="bg-purple-500 text-white px-3 py-1 rounded text-xs">
+                        Test Produits
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-semibold mb-3">📊 Données</h3>
+                <p class="text-gray-600 mb-4">Synchronisation hors-ligne</p>
+                <ul class="text-sm text-gray-500 space-y-1">
+                    <li>💾 SQLite local dans l'app</li>
+                    <li>🔄 Sync automatique</li>
+                    <li>📍 Géofencing avancé</li>
+                    <li>📸 Photos de visite</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Zone de test API -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">🧪 Test de l'API</h2>
+            <div class="bg-gray-50 p-4 rounded border">
+                <div class="flex items-center mb-2">
+                    <span class="font-mono text-sm text-gray-600">GET</span>
+                    <span id="api-url" class="font-mono text-sm ml-2">http://localhost:3000</span>
+                </div>
+                <pre id="api-response" class="text-xs text-gray-700 bg-white p-3 rounded border overflow-x-auto">Cliquez sur un bouton de test pour voir la réponse...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vérification automatique du statut de l'API au chargement
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                document.getElementById('api-status').innerHTML = 
+                    `<span class="text-green-600">✅ ${data.status} (Uptime: ${Math.floor(data.uptime)}s)</span>`;
+            } catch (error) {
+                document.getElementById('api-status').innerHTML = 
+                    `<span class="text-red-600">❌ Hors ligne</span>`;
+            }
+        }
+
+        // Test des endpoints API
+        async function testAPI(endpoint) {
+            const url = `http://localhost:3000${endpoint}`;
+            document.getElementById('api-url').textContent = url;
+            document.getElementById('api-response').textContent = 'Chargement...';
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                document.getElementById('api-response').textContent = 
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('api-response').textContent = 
+                    `Erreur: ${error.message}`;
+            }
+        }
+
+        // Vérification automatique au chargement
+        checkAPIStatus();
+        
+        // Rafraîchir le statut toutes les 30 secondes
+        setInterval(checkAPIStatus, 30000);
+    </script>
+</body>
+</html>

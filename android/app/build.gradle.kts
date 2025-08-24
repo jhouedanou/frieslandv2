@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.friesland.dashboard.friesland_dashboard"
     compileSdk = flutter.compileSdkVersion
-    // ndkVersion = flutter.ndkVersion  // Disabled to avoid NDK issues
+    // NDK completely disabled
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -28,6 +28,11 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Disable NDK to avoid NDK issues
+        ndk {
+            // Empty - disables NDK compilation
+        }
     }
 
     buildTypes {

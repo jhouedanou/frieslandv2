@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # Service Flutter Development uniquement
+  flutter-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: friesland-flutter-dev
+    volumes:
+      - .:/app
+      - flutter_cache:/opt/flutter/.pub-cache
+    ports:
+      - "8080:8080"   # Flutter Web
+    environment:
+      - FLUTTER_WEB_PORT=8080
+      - FLUTTER_WEB_HOSTNAME=0.0.0.0
+    stdin_open: true
+    tty: true
+    working_dir: /app
+
+volumes:
+  flutter_cache:
+    driver: local

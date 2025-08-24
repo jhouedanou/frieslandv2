@@ -1,0 +1,31 @@
+name: friesland_dashboard
+description: Application Flutter pour la gestion des visites commerciales Friesland Bonnet Rouge
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Interface utilisateur
+  cupertino_icons: ^1.0.6
+  
+  # Graphiques
+  fl_chart: ^0.65.0
+  
+  # HTTP et API
+  dio: ^5.4.0
+  http: ^1.1.0
+  
+  # Utilitaires
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true

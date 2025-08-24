@@ -6,7 +6,7 @@ import '../visits/visits_list_page.dart';
 import '../profile/profile_page.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({super.key});
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -63,7 +63,7 @@ class _MainPageState extends State<MainPage> {
 }
 
 class VisitsListPage extends StatelessWidget {
-  const VisitsListPage({Key? key}) : super(key: key);
+  const VisitsListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -92,19 +92,19 @@ class VisitsListPage extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: CircleAvatar(
+              leading: const CircleAvatar(
                 backgroundColor: AppTheme.primaryColor,
-                child: const Icon(Icons.store, color: Colors.white),
+                child: Icon(Icons.store, color: Colors.white),
               ),
               title: Text('Boutique ${index + 1}'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Commercial: COULIBALY PADIE'),
+                  const Text('Commercial: COULIBALY PADIE'),
                   Text('${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'),
                 ],
               ),
-              trailing: Column(
+              trailing: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
@@ -112,8 +112,8 @@ class VisitsListPage extends StatelessWidget {
                     color: AppTheme.successColor,
                     size: 20,
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
+                  SizedBox(height: 4),
+                  Text(
                     'Validée',
                     style: TextStyle(fontSize: 12),
                   ),
@@ -138,7 +138,7 @@ class VisitsListPage extends StatelessWidget {
 }
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {

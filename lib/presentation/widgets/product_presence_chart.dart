@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/themes/app_theme.dart';
-import '../../core/constants/app_constants.dart';
 
 class ProductPresenceChart extends StatelessWidget {
-  const ProductPresenceChart({Key? key}) : super(key: key);
+  const ProductPresenceChart({super.key});
 
   @override
   Widget build(BuildContext context) {

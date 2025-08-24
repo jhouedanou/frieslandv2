@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../constants/app_constants.dart';
 
 class AppDatabase {
   static final AppDatabase _instance = AppDatabase._internal();

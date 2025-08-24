@@ -6,7 +6,7 @@ void main() {
 }
 
 class FrieslandApp extends StatelessWidget {
-  const FrieslandApp({Key? key}) : super(key: key);
+  const FrieslandApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class FrieslandApp extends StatelessWidget {
 }
 
 class DashboardPage extends StatelessWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+  const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {

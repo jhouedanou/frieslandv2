@@ -8,13 +8,13 @@ class KPICard extends StatelessWidget {
   final IconData icon;
 
   const KPICard({
-    Key? key,
+    super.key,
     required this.title,
     required this.value,
     required this.subtitle,
     required this.color,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

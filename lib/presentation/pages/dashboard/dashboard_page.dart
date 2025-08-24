@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/themes/app_theme.dart';
 import '../../widgets/kpi_card.dart';
 import '../../widgets/product_presence_chart.dart';
 import '../../widgets/commercial_performance_chart.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({Key? key}) : super(key: key);
+  const DashboardPage({super.key});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -48,7 +46,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 16),
             
             // KPI Cards Row 1
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: KPICard(
@@ -59,7 +57,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     icon: Icons.store,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: KPICard(
                     title: 'PDV Actifs',
@@ -74,7 +72,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 12),
             
             // KPI Cards Row 2
-            Row(
+            const Row(
               children: [
                 Expanded(
                   child: KPICard(
@@ -85,7 +83,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     icon: Icons.attach_money,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: KPICard(
                     title: 'Alertes',

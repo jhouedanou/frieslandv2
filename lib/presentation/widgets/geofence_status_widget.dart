@@ -7,10 +7,10 @@ class GeofenceStatusWidget extends StatelessWidget {
   final bool isLoading;
 
   const GeofenceStatusWidget({
-    Key? key,
+    super.key,
     this.geofenceStatus,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

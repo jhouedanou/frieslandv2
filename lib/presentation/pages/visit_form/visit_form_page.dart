@@ -9,7 +9,7 @@ import '../../widgets/geofence_status_widget.dart';
 class VisitFormPage extends StatefulWidget {
   final PDV? selectedPDV;
   
-  const VisitFormPage({Key? key, this.selectedPDV}) : super(key: key);
+  const VisitFormPage({super.key, this.selectedPDV});
 
   @override
   State<VisitFormPage> createState() => _VisitFormPageState();
@@ -31,7 +31,7 @@ class _VisitFormPageState extends State<VisitFormPage> with TickerProviderStateM
   bool _isLocationLoading = true;
   
   // Product data
-  Map<String, Map<String, String?>> _productData = {
+  final Map<String, Map<String, String?>> _productData = {
     'EVAP': {
       'present': 'false',
       'br_gold': null,

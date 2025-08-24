@@ -10,13 +10,13 @@ class ProductSection extends StatelessWidget {
   final bool isSimpleSection;
 
   const ProductSection({
-    Key? key,
+    super.key,
     required this.category,
     required this.products,
     required this.productData,
     required this.onProductDataChanged,
     this.isSimpleSection = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

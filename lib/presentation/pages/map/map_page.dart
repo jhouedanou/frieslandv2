@@ -8,7 +8,7 @@ import '../../../core/themes/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 
 class MapPage extends StatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -450,7 +450,7 @@ class _MapPageState extends State<MapPage> {
       );
     } else {
       try {
-        final position = await _geofencingService.currentPosition;
+        final position = _geofencingService.currentPosition;
         if (position != null) {
           _mapController.move(
             LatLng(position.latitude, position.longitude),

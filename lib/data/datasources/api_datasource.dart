@@ -42,8 +42,8 @@ class ApiDataSourceImpl implements ApiDataSource {
   late final Dio _dio;
   final String baseUrl;
 
-  // Support Docker environment with dashboard API
-  ApiDataSourceImpl({this.baseUrl = 'http://dashboard:80/api/v1'}) {
+  // Support local development with localhost API
+  ApiDataSourceImpl({this.baseUrl = 'http://localhost/api/v1'}) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 30),

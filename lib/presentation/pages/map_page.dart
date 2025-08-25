@@ -22,7 +22,7 @@ class _MapPageState extends State<MapPage> {
   List<PDVModel> _pdvs = [];
   Position? _currentPosition;
   bool _isLoading = true;
-  bool _showGeofencing = true;
+  // _showGeofencing supprimé - géofencing non affiché sur la carte
   String _filterSecteur = 'Tous';
   PDVModel? _selectedPDV;
 
@@ -80,14 +80,7 @@ class _MapPageState extends State<MapPage> {
         backgroundColor: const Color(0xFFE53E3E),
         foregroundColor: Colors.white,
         actions: [
-          // Toggle géofencing
-          IconButton(
-            icon: Icon(_showGeofencing ? Icons.visibility : Icons.visibility_off),
-            onPressed: () {
-              setState(() => _showGeofencing = !_showGeofencing);
-            },
-            tooltip: 'Géofencing',
-          ),
+          // Toggle géofencing supprimé selon demande utilisateur
           // Localisation
           IconButton(
             icon: const Icon(Icons.my_location),
@@ -114,7 +107,7 @@ class _MapPageState extends State<MapPage> {
                             ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
                             : null,
                         onPDVTap: _onPDVTap,
-                        showGeofencing: _showGeofencing,
+                        showGeofencing: false, // Toujours désactivé selon demande utilisateur
                       ),
                       
                       // Panneau d'informations PDV sélectionné

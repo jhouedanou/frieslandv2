@@ -5,6 +5,7 @@ import 'map_page.dart';
 import 'pdv_list_page.dart';
 import 'profile_page.dart';
 import 'create_visit_page.dart';
+import 'orders/order_main_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,6 +17,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   final AuthService _authService = AuthService();
+  bool _isOrderMode = false; // Pour basculer entre visite et commande
   
   late final List<Widget> _pages;
   late final List<BottomNavigationBarItem> _bottomNavItems;
@@ -31,6 +33,7 @@ class _MainScreenState extends State<MainScreen> {
       const HomeCalendarPage(), // Page principale avec calendrier et routing
       const MapPage(showAppBar: false), // Carte OpenStreetMap
       const PDVListPage(), // Liste et création de PDV
+      const OrderMainPage(), // Page de commande
       const ProfilePage(), // Profil utilisateur
     ];
 
@@ -54,6 +57,12 @@ class _MainScreenState extends State<MainScreen> {
         tooltip: 'Gérer les PDV',
       ),
       const BottomNavigationBarItem(
+        icon: Icon(Icons.shopping_cart_outlined),
+        activeIcon: Icon(Icons.shopping_cart),
+        label: 'Commande',
+        tooltip: 'Réapprovisionner les PDV',
+      ),
+      const BottomNavigationBarItem(
         icon: Icon(Icons.person_outline),
         activeIcon: Icon(Icons.person),
         label: 'Profil',
@@ -75,6 +84,21 @@ class _MainScreenState extends State<MainScreen> {
         builder: (context) => const CreateVisitPage(),
       ),
     );
+  }
+
+  void _createNewOrder() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const OrderMainPage(),
+      ),
+    );
+  }
+
+  void _toggleFabMode() {
+    setState(() {
+      _isOrderMode = !_isOrderMode;
+    });
   }
 
   @override
@@ -192,12 +216,49 @@ class _MainScreenState extends State<MainScreen> {
         index: _currentIndex,
         children: _pages,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createNewVisit,
-        backgroundColor: const Color(0xFFE53E3E),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-        tooltip: 'Nouvelle visite',
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Bouton principal FAB
+          FloatingActionButton(
+            onPressed: _isOrderMode ? _createNewOrder : _createNewVisit,
+            backgroundColor: const Color(0xFFE53E3E),
+            foregroundColor: Colors.white,
+            heroTag: "mainFab",
+            child: Icon(_isOrderMode ? Icons.shopping_cart : Icons.add),
+            tooltip: _isOrderMode ? 'Nouvelle commande' : 'Nouvelle visite',
+          ),
+          const SizedBox(height: 8),
+          // Mini bouton pour basculer le mode
+          GestureDetector(
+            onTap: _toggleFabMode,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFFE53E3E),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                _isOrderMode ? Icons.edit : Icons.shopping_cart,
+                color: const Color(0xFFE53E3E),
+                size: 20,
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

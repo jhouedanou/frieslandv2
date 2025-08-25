@@ -781,7 +781,7 @@ class _VisitFormPageState extends State<VisitFormPage>
                   const SizedBox(height: 12),
                   
                   // Affichage des photos capturées
-                  if (_capturedImages.isNotEmpty) ..[
+                  if (_capturedImages.isNotEmpty) ...[
                     Container(
                       height: 100,
                       margin: const EdgeInsets.only(bottom: 12),
@@ -850,7 +850,7 @@ class _VisitFormPageState extends State<VisitFormPage>
                           ),
                         ),
                       ),
-                      if (_capturedImages.isNotEmpty) ..[
+                      if (_capturedImages.isNotEmpty) ...[
                         const SizedBox(width: 8),
                         OutlinedButton.icon(
                           onPressed: () {

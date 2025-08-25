@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'presentation/pages/visits_list_page.dart';
+import 'presentation/pages/auth/login_page.dart';
+import 'core/services/auth_service.dart';
 
 void main() {
   runApp(const FrieslandApp());
@@ -11,13 +14,181 @@ class FrieslandApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Friesland Dashboard',
+      title: 'Friesland Bonnet Rouge',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.red,
+        primaryColor: const Color(0xFFE53E3E),
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFE53E3E),
+          primary: const Color(0xFFE53E3E),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFE53E3E),
+          foregroundColor: Colors.white,
+          elevation: 2,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFE53E3E),
+            foregroundColor: Colors.white,
+          ),
+        ),
       ),
-      home: const DashboardPage(),
+      home: const AuthWrapper(), // Vérification d'authentification au démarrage
+    );
+  }
+}
+
+/// Widget qui gère la navigation selon l'état d'authentification
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  final AuthService _authService = AuthService();
+  bool _isLoading = true;
+  bool _isAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    try {
+      final isLoggedIn = await _authService.initialize();
+      setState(() {
+        _isAuthenticated = isLoggedIn;
+        _isLoading = false;
+      });
+
+      if (isLoggedIn) {
+        print('✅ Utilisateur déjà connecté: ${_authService.userName}');
+        print('📍 Zone: ${_authService.userZone}');
+      } else {
+        print('🔐 Aucun utilisateur connecté - redirection vers login');
+      }
+    } catch (e) {
+      print('❌ Erreur vérification auth: $e');
+      setState(() {
+        _isAuthenticated = false;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SplashScreen();
+    }
+
+    return _isAuthenticated ? const VisitesListPage() : const LoginPage();
+  }
+}
+
+/// Écran de chargement avec branding Bonnet Rouge
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFE53E3E), // Rouge Bonnet Rouge principal
+              Color(0xFFD32F2F), // Rouge plus foncé
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Titre
+              const Text(
+                'BONNET ROUGE',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                ),
+              ),
+              
+              const SizedBox(height: 8),
+              
+              const Text(
+                '100 ans d\'énergie dès le matin !',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+              
+              const SizedBox(height: 48),
+              
+              // Indicateur de chargement
+              const SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              const Text(
+                'Chargement...',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

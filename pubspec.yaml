@@ -22,7 +22,7 @@ dependencies:
   geodesy: ^0.4.2
   location: ^6.0.2
 
-  # Cartes et Navigation - Updated
+  # Cartes et Navigation - Updated pour OpenStreetMap
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   url_launcher: ^6.3.1

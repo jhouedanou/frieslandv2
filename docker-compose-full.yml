@@ -44,8 +44,8 @@ services:
       - QUEUE_CONNECTION=redis
       - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./dashboard:/var/www
       - dashboard_storage:/var/www/storage

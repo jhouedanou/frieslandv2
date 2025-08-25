@@ -175,7 +175,7 @@ class _VisitesListPageState extends State<VisitesListPage> {
             ],
           ),
         ],
-      ),
+      ) : null,
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

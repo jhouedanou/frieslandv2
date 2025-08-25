@@ -50,7 +50,9 @@ class GeofencingService {
   Future<void> _getCurrentPosition() async {
     try {
       _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
     } catch (e) {
       throw Exception('Failed to get current position: $e');
@@ -73,7 +75,7 @@ class GeofencingService {
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     final LatLng point1 = LatLng(lat1, lon1);
     final LatLng point2 = LatLng(lat2, lon2);
-    return _geodesy.distanceBetweenTwoGeoPoints(point1, point2);
+    return _geodesy.distanceBetweenTwoGeoPoints(point1, point2).toDouble();
   }
 
   bool isWithinGeofence(PDV pdv, Position? position) {

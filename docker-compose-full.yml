@@ -42,7 +42,7 @@ services:
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
       - QUEUE_CONNECTION=redis
-      - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1,flutter_app
+      - SANCTUM_STATEFUL_DOMAINS=localhost,127.0.0.1
     ports:
       - "80:80"
       - "443:443"
@@ -70,25 +70,6 @@ services:
         /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
       "
 
-  # Application Flutter (optionnel pour tests)
-  flutter_app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: friesland_flutter
-    environment:
-      - API_BASE_URL=http://dashboard:80/api/v1
-    ports:
-      - "8080:8080"
-    depends_on:
-      - dashboard
-    networks:
-      - friesland_network
-    volumes:
-      - ./lib:/app/lib
-      - ./assets:/app/assets
-      - ./pubspec.yaml:/app/pubspec.yaml
-
   # Redis pour le cache (optionnel)
   redis:
     image: redis:7-alpine
@@ -100,20 +81,6 @@ services:
     networks:
       - friesland_network
     command: redis-server --appendonly yes
-
-  # Nginx pour proxy reverse (optionnel)
-  nginx:
-    image: nginx:alpine
-    container_name: friesland_nginx
-    ports:
-      - "8000:80"
-    volumes:
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./dashboard/public:/var/www/html/public
-    depends_on:
-      - dashboard
-    networks:
-      - friesland_network
 
   # Monitoring avec Adminer pour la BDD
   adminer:

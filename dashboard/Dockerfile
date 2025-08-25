@@ -9,13 +9,14 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     libpq-dev \
+    libicu-dev \
     zip \
     unzip \
     supervisor \
     nginx \
     nodejs \
     npm \
-    && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip \
+    && docker-php-ext-install pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd zip intl \
     && docker-php-ext-enable pdo_pgsql \
     && rm -rf /var/lib/apt/lists/*
 
@@ -38,8 +39,11 @@ RUN if [ -f package.json ]; then npm ci --production; fi
 # Copy application files
 COPY . .
 
-# Finish composer install with scripts and autoloader
-RUN composer install --no-dev --optimize-autoloader
+# Create .env file for build process
+RUN cp env.example .env
+
+# Skip autoload generation during build - will be done at runtime
+# This prevents artisan script execution issues during Docker build
 
 # Create Laravel directories and set permissions
 RUN mkdir -p /var/www/storage/logs \
@@ -62,6 +66,9 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Create entrypoint script
 RUN echo '#!/bin/bash\n\
 set -e\n\
+\n\
+# Generate optimized autoloader\n\
+composer dump-autoload --no-dev --optimize\n\
 \n\
 # Wait for database\n\
 until php artisan tinker --execute="DB::connection()->getPdo();" > /dev/null 2>&1; do\n\

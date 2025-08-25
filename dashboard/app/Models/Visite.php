@@ -5,93 +5,90 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Visite extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
     protected $table = 'visites';
 
+    // Structure selon CLAUDE.md
     protected $fillable = [
-        'pdv_id',
-        'commercial_id',
+        'visite_id',
+        'pdv_id', 
+        'commercial',
         'date_visite',
-        'heure_debut',
-        'heure_fin',
-        'latitude_debut',
-        'longitude_debut',
-        'latitude_fin',
-        'longitude_fin',
-        'statut',
-        'notes',
-        'produits_verifies',
-        'prix_verifies',
-        'photos',
-        'signature',
+        'geolocation',
+        'geofence_validated',
+        'precision_gps',
+        'produits',
+        'concurrence', 
+        'visibilite',
+        'actions',
+        'images',
+        'sync_status',
     ];
 
     protected $casts = [
-        'date_visite' => 'date',
-        'heure_debut' => 'datetime',
-        'heure_fin' => 'datetime',
-        'latitude_debut' => 'decimal:8',
-        'longitude_debut' => 'decimal:8',
-        'latitude_fin' => 'decimal:8',
-        'longitude_fin' => 'decimal:8',
-        'produits_verifies' => 'array',
-        'prix_verifies' => 'array',
-        'photos' => 'array',
+        'date_visite' => 'datetime',
+        'geolocation' => 'array', // {lat: float, lng: float}
+        'geofence_validated' => 'boolean',
+        'precision_gps' => 'decimal:2',
+        'produits' => 'array', // Structure JSON complexe selon CLAUDE.md
+        'concurrence' => 'array', // Structure JSON selon CLAUDE.md
+        'visibilite' => 'array', // Structure JSON selon CLAUDE.md
+        'actions' => 'array', // Structure JSON selon CLAUDE.md
+        'images' => 'array', // Array de base64 ou URLs
     ];
 
     public function pdv(): BelongsTo
     {
-        return $this->belongsTo(PDV::class, 'pdv_id');
+        return $this->belongsTo(PDV::class, 'pdv_id', 'pdv_id');
     }
 
-    public function commercial(): BelongsTo
+    // Accesseurs pour calculer KPIs selon CLAUDE.md
+    public function getEvapPresentAttribute(): bool
     {
-        return $this->belongsTo(User::class, 'commercial_id');
+        return $this->produits['evap']['present'] ?? false;
     }
 
-    public function getDureeVisiteAttribute(): string
+    public function getImpPresentAttribute(): bool  
     {
-        if (!$this->heure_debut || !$this->heure_fin) {
-            return 'N/A';
-        }
-
-        $duree = $this->heure_fin->diffInMinutes($this->heure_debut);
-        $heures = intval($duree / 60);
-        $minutes = $duree % 60;
-
-        if ($heures > 0) {
-            return "{$heures}h {$minutes}min";
-        }
-
-        return "{$minutes}min";
+        return $this->produits['imp']['present'] ?? false;
     }
 
-    public function getDistanceParcourueAttribute(): float
+    public function getScmPresentAttribute(): bool
     {
-        if (!$this->latitude_debut || !$this->longitude_debut || 
-            !$this->latitude_fin || !$this->longitude_fin) {
-            return 0;
-        }
-
-        $earthRadius = 6371000;
-        $latFrom = deg2rad($this->latitude_debut);
-        $lonFrom = deg2rad($this->longitude_debut);
-        $latTo = deg2rad($this->latitude_fin);
-        $lonTo = deg2rad($this->longitude_fin);
-
-        $latDelta = $latTo - $latFrom;
-        $lonDelta = $lonTo - $lonFrom;
-
-        $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-
-        return round($angle * $earthRadius, 2);
+        return $this->produits['scm']['present'] ?? false;
     }
 
+    public function getUhtPresentAttribute(): bool
+    {
+        return $this->produits['uht']['present'] ?? false;
+    }
+
+    public function getYaourtPresentAttribute(): bool
+    {
+        return $this->produits['yaourt']['present'] ?? false;
+    }
+
+    public function getEvapPrixRespecteAttribute(): bool
+    {
+        return $this->produits['evap']['prix_respectes'] ?? false;
+    }
+
+    public function getImpPrixRespecteAttribute(): bool
+    {
+        return $this->produits['imp']['prix_respectes'] ?? false;
+    }
+
+    public function getScmPrixRespecteAttribute(): bool
+    {
+        return $this->produits['scm']['prix_respectes'] ?? false;
+    }
+
+    // Scopes pour les KPIs Dashboard selon CLAUDE.md
     public function scopeAujourdhui($query)
     {
         return $query->whereDate('date_visite', today());
@@ -105,5 +102,45 @@ class Visite extends Model
     public function scopeCeMois($query)
     {
         return $query->whereMonth('date_visite', now()->month);
+    }
+
+    public function scopeAvecEvap($query)
+    {
+        return $query->whereJsonContains('produits->evap->present', true);
+    }
+
+    public function scopeAvecImp($query)
+    {
+        return $query->whereJsonContains('produits->imp->present', true);
+    }
+
+    public function scopeAvecScm($query)
+    {
+        return $query->whereJsonContains('produits->scm->present', true);
+    }
+
+    public function scopeAvecUht($query)
+    {
+        return $query->whereJsonContains('produits->uht->present', true);
+    }
+
+    public function scopeParCommercial($query, $commercial)
+    {
+        return $query->where('commercial', $commercial);
+    }
+
+    public function scopeSynced($query)
+    {
+        return $query->where('sync_status', 'synced');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('sync_status', 'pending');
+    }
+
+    public function scopeFailed($query)
+    {
+        return $query->where('sync_status', 'failed');
     }
 } 

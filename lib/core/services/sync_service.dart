@@ -36,8 +36,8 @@ class SyncService {
     await _checkConnectivity();
     
     // Écouter les changements de connectivité
-    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
-      _onConnectivityChanged(result);
+    _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      _onConnectivityChanged(results.isNotEmpty ? results.first : ConnectivityResult.none);
     });
     
     // Démarrer la synchronisation périodique
@@ -45,8 +45,8 @@ class SyncService {
   }
 
   Future<void> _checkConnectivity() async {
-    final connectivityResult = await _connectivity.checkConnectivity();
-    _isOnline = connectivityResult != ConnectivityResult.none;
+    final connectivityResults = await _connectivity.checkConnectivity();
+    _isOnline = connectivityResults.isNotEmpty && !connectivityResults.contains(ConnectivityResult.none);
     
     if (_isOnline) {
       // Tenter de synchroniser au démarrage
@@ -92,7 +92,7 @@ class SyncService {
       
     } catch (e) {
       _syncProgress('Erreur de synchronisation: $e');
-      print('Sync error: $e');
+      // Log sync error: $e
     } finally {
       _isSyncing = false;
       _syncStatusController.add(false);
@@ -124,7 +124,7 @@ class SyncService {
         await _localDb.removeSyncQueueItem(item['id'] as int);
         
       } catch (e) {
-        print('Erreur sync item ${item['id']}: $e');
+        // Log erreur sync item ${item['id']}: $e
         // Laisser dans la queue pour réessayer plus tard
       }
     }
@@ -155,14 +155,14 @@ class SyncService {
   Future<void> _syncServerToLocal() async {
     try {
       // Obtenir le timestamp de la dernière synchronisation
-      final lastSync = await _localDb.getLastSyncTimestamp();
+      await _localDb.getLastSyncTimestamp();
       
       // Synchroniser les PDVs depuis le serveur
       _syncProgress('Synchronisation des PDV...');
       final pdvs = await _apiDataSource.getPDVs();
       
       for (final pdv in pdvs) {
-        await _localDb.insertOrUpdatePDV(pdv.toFirestore());
+        await _localDb.insertOrUpdatePDV(pdv.toJson());
         await _localDb.markAsSynced('pdv', pdv.pdvId);
       }
       
@@ -171,7 +171,7 @@ class SyncService {
       final visites = await _apiDataSource.getVisites();
       
       for (final visite in visites) {
-        await _localDb.insertOrUpdateVisite(visite.toFirestore());
+        await _localDb.insertOrUpdateVisite(visite.toJson());
         await _localDb.markAsSynced('visites', visite.visiteId);
       }
       
@@ -183,10 +183,10 @@ class SyncService {
     }
   }
 
-  // Méthodes pour sauvegarder en local avec queue de sync
+  // Méthodes pour sauvegarder en local avec queue de sync selon CLAUDE.md
   Future<void> saveVisiteOffline(VisiteModel visite, {bool isUpdate = false}) async {
     try {
-      final visiteData = visite.toFirestore();
+      final visiteData = visite.toJson(); // Utilise toJson() au lieu de toFirestore()
       
       if (isUpdate) {
         await _localDb.updateVisite(visite.visiteId, visiteData);
@@ -209,7 +209,7 @@ class SyncService {
   Future<List<VisiteModel>> getVisitesOffline() async {
     try {
       final visits = await _localDb.getVisites();
-      return visits.map((data) => VisiteModel.fromFirestore(data)).toList();
+      return visits.map((data) => VisiteModel.fromJson(data)).toList();
     } catch (e) {
       throw Exception('Erreur récupération visites locales: $e');
     }
@@ -218,7 +218,7 @@ class SyncService {
   Future<List<PDVModel>> getPDVsOffline() async {
     try {
       final pdvs = await _localDb.getPDVs();
-      return pdvs.map((data) => PDVModel.fromFirestore(data)).toList();
+      return pdvs.map((data) => PDVModel.fromJson(data)).toList();
     } catch (e) {
       throw Exception('Erreur récupération PDV locaux: $e');
     }

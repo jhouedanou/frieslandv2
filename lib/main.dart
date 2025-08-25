@@ -29,7 +29,17 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard Friesland Bonnet Rouge'),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 32,
+              width: 32,
+            ),
+            const SizedBox(width: 12),
+            const Text('Dashboard Friesland Bonnet Rouge'),
+          ],
+        ),
         backgroundColor: const Color(0xFFE53E3E),
         foregroundColor: Colors.white,
       ),

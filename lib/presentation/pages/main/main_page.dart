@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../core/themes/app_theme.dart';
 import '../dashboard/dashboard_page.dart';
 import '../map/map_page.dart';
-import '../visits/visits_list_page.dart';
-import '../profile/profile_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});

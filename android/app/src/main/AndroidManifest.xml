@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     
     <!-- Location permissions for GPS and geofencing -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -8,7 +9,8 @@
     <!-- Camera permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
-        android:maxSdkVersion="32" />
+        android:maxSdkVersion="32" 
+        tools:replace="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
     
@@ -37,7 +39,7 @@
     <application
         android:label="Friesland CRM"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name="com.friesland.dashboard.friesland_dashboard.MainActivity"
             android:exported="true"

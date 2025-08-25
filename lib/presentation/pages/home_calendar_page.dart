@@ -4,6 +4,7 @@ import '../../core/services/sync_service.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/support_service.dart';
 import '../../core/services/planning_service.dart';
+import '../../core/services/geofencing_service.dart';
 import '../../data/models/pdv_model.dart';
 import '../../data/models/planning_visit_model.dart';
 import '../widgets/planning_carousel.dart';
@@ -19,6 +20,7 @@ class HomeCalendarPage extends StatefulWidget {
 class _HomeCalendarPageState extends State<HomeCalendarPage> {
   final SyncService _syncService = SyncService();
   final AuthService _authService = AuthService();
+  final GeofencingService _geofencingService = GeofencingService();
   final GlobalKey _screenshotKey = GlobalKey();
   
   DateTime _selectedDay = DateTime.now();
@@ -43,6 +45,16 @@ class _HomeCalendarPageState extends State<HomeCalendarPage> {
   void initState() {
     super.initState();
     _loadData();
+    _initializeGeofencing();
+  }
+
+  Future<void> _initializeGeofencing() async {
+    try {
+      await _geofencingService.initialize();
+    } catch (e) {
+      // Handle geofencing initialization error
+      print('Erreur initialisation géofencing: $e');
+    }
   }
 
   Future<void> _loadData() async {
@@ -549,14 +561,9 @@ class _HomeCalendarPageState extends State<HomeCalendarPage> {
               ),
               const Spacer(),
               TextButton.icon(
-                onPressed: () {
-                  // TODO: Optimiser le routing
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Optimisation du routing...')),
-                  );
-                },
-                icon: const Icon(Icons.route, size: 16),
-                label: const Text('Optimiser'),
+                onPressed: _showNearestPDVPopup,
+                icon: const Icon(Icons.near_me, size: 16),
+                label: const Text('PDV le plus proche'),
               ),
             ],
           ),
@@ -695,13 +702,278 @@ class _HomeCalendarPageState extends State<HomeCalendarPage> {
     return '${months[date.month - 1]} ${date.year}';
   }
 
-  void _startVisit(PDVModel pdv) {
-    // Aller directement à la fiche de visite avec le PDV présélectionné
+  void _startVisit(PDVModel pdv) async {
+    // Vérifier le géofencing avant de commencer la visite
+    final currentPosition = _geofencingService.currentPosition;
+    
+    if (currentPosition == null) {
+      _showGeofenceError(
+        'Position GPS indisponible',
+        'Veuillez activer le GPS et réessayer.',
+        pdv,
+      );
+      return;
+    }
+
+    final validation = _geofencingService.validateGeofence(pdv, currentPosition);
+    
+    if (!validation.isValid) {
+      _showGeofenceError(
+        'Trop éloigné du PDV',
+        'Vous devez être à moins de ${pdv.rayonGeofence.toInt()}m du PDV pour commencer la visite.\n\n'
+        'Distance actuelle: ${validation.distance.toStringAsFixed(0)}m\n'
+        'Rapprochez-vous du PDV et réessayez.',
+        pdv,
+      );
+      return;
+    }
+
+    // Si le géofencing est validé, aller à la fiche de visite
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => VisitFormPage(selectedPDV: pdv),
       ),
+    );
+  }
+
+  void _showGeofenceError(String title, String message, PDVModel pdv) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.location_off, color: Colors.red.shade600),
+              const SizedBox(width: 8),
+              Expanded(child: Text(title)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info, color: Colors.blue.shade600, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Utilisez la carte pour vous diriger vers le PDV',
+                        style: TextStyle(
+                          color: Colors.blue.shade700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fermer'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Naviguer vers la page carte avec le PDV sélectionné
+                Navigator.pushNamed(
+                  context,
+                  '/map',
+                  arguments: pdv,
+                );
+              },
+              icon: const Icon(Icons.map, size: 16),
+              label: const Text('Voir sur carte'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNearestPDVPopup() {
+    final currentPosition = _geofencingService.currentPosition;
+    
+    if (currentPosition == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Position GPS indisponible')),
+      );
+      return;
+    }
+
+    if (_todayPDVs.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucun PDV planifié aujourd\'hui')),
+      );
+      return;
+    }
+
+    // Calculer les distances pour tous les PDVs d'aujourd'hui
+    final pdvsWithDistance = _todayPDVs.map((pdv) {
+      final distance = _geofencingService.calculateDistance(
+        currentPosition.latitude,
+        currentPosition.longitude,
+        pdv.latitude,
+        pdv.longitude,
+      );
+      return {
+        'pdv': pdv,
+        'distance': distance,
+      };
+    }).toList();
+
+    // Trier par distance
+    pdvsWithDistance.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
+    final nearestPDV = pdvsWithDistance.first['pdv'] as PDVModel;
+    final nearestDistance = pdvsWithDistance.first['distance'] as double;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.near_me, color: Colors.green.shade600),
+              const SizedBox(width: 8),
+              const Expanded(child: Text('PDV le plus proche')),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.store, color: Colors.blue.shade600),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              nearestPDV.nomPdv,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on, color: Colors.red.shade600, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${nearestDistance.toStringAsFixed(0)} m',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: nearestDistance <= 30 ? Colors.green.shade600 : Colors.orange.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        nearestPDV.adressage,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (nearestDistance <= 30)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Vous êtes assez proche pour commencer la visite',
+                          style: TextStyle(color: Colors.green),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.orange.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange.shade600, size: 20),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Rapprochez-vous à moins de 30m pour commencer',
+                          style: TextStyle(color: Colors.orange),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Fermer'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Aller directement vers ce PDV
+                if (nearestDistance <= 30) {
+                  _startVisit(nearestPDV);
+                } else {
+                  // Afficher sur la carte
+                  Navigator.pushNamed(
+                    context,
+                    '/map',
+                    arguments: nearestPDV,
+                  );
+                }
+              },
+              icon: Icon(nearestDistance <= 30 ? Icons.play_arrow : Icons.map, size: 16),
+              label: Text(nearestDistance <= 30 ? 'Commencer visite' : 'Voir sur carte'),
+            ),
+          ],
+        );
+      },
     );
   }
 

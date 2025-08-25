@@ -14,7 +14,7 @@ class FrieslandApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Friesland Bonnet Rouge',
+      title: 'Friesland Campina',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.red,
@@ -144,7 +144,7 @@ class SplashScreen extends StatelessWidget {
               
               // Titre
               const Text(
-                'BONNET ROUGE',
+                'FRIESLAND CAMPINA',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -156,7 +156,7 @@ class SplashScreen extends StatelessWidget {
               const SizedBox(height: 8),
               
               const Text(
-                '100 ans d\'énergie dès le matin !',
+                'Nourrir le monde naturellement',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.white70,
@@ -208,7 +208,7 @@ class DashboardPage extends StatelessWidget {
               width: 32,
             ),
             const SizedBox(width: 12),
-            const Text('Dashboard Friesland Bonnet Rouge'),
+            const Text('Dashboard Friesland Campina'),
           ],
         ),
         backgroundColor: const Color(0xFFE53E3E),

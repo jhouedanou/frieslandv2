@@ -3,125 +3,113 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
     /**
-     * Liste des produits Friesland
+     * Liste des produits Friesland depuis la base de données
      */
     public function index(Request $request): JsonResponse
     {
-        // Données statiques des produits Friesland
-        $products = [
-            [
-                'id' => 1,
-                'name' => 'Peak Milk Powder',
-                'category' => 'Dairy',
-                'brand' => 'Peak',
-                'sku' => 'PEAK_MP_400G',
-                'size' => '400g',
-                'unit_price' => 850,
-                'active' => true,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Three Crowns Milk',
-                'category' => 'Dairy',
-                'brand' => 'Three Crowns',
-                'sku' => 'TC_MILK_400G',
-                'size' => '400g',
-                'unit_price' => 800,
-                'active' => true,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Completa Milk',
-                'category' => 'Dairy',
-                'brand' => 'Completa',
-                'sku' => 'COMP_MILK_400G',
-                'size' => '400g',
-                'unit_price' => 750,
-                'active' => true,
-            ],
-            [
-                'id' => 4,
-                'name' => 'Friso Growing Up Milk',
-                'category' => 'Baby Formula',
-                'brand' => 'Friso',
-                'sku' => 'FRISO_GUM_400G',
-                'size' => '400g',
-                'unit_price' => 1200,
-                'active' => true,
-            ],
-            [
-                'id' => 5,
-                'name' => 'Friso Gold Formula',
-                'category' => 'Baby Formula',
-                'brand' => 'Friso',
-                'sku' => 'FRISO_GOLD_400G',
-                'size' => '400g',
-                'unit_price' => 1500,
-                'active' => true,
-            ],
-        ];
+        $query = Product::query();
 
         // Filtres
         if ($request->has('category')) {
-            $products = array_filter($products, function ($product) use ($request) {
-                return strtolower($product['category']) === strtolower($request->category);
-            });
-        }
-
-        if ($request->has('brand')) {
-            $products = array_filter($products, function ($product) use ($request) {
-                return strtolower($product['brand']) === strtolower($request->brand);
-            });
+            $query->where('category', $request->category);
         }
 
         if ($request->has('active')) {
             $isActive = filter_var($request->active, FILTER_VALIDATE_BOOLEAN);
-            $products = array_filter($products, function ($product) use ($isActive) {
-                return $product['active'] === $isActive;
-            });
+            $query->where('is_active', $isActive);
+        } else {
+            // Par défaut, ne montrer que les produits actifs
+            $query->where('is_active', true);
         }
 
+        // Tri par catégorie puis par nom
+        $query->orderBy('category')->orderBy('name');
+
+        $products = $query->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'code' => $product->code,
+                'name' => $product->name,
+                'category' => $product->category,
+                'price' => $product->price,
+                'unit_price' => $product->price, // Alias pour compatibilité
+                'stock_quantity' => $product->stock_quantity,
+                'unit' => $product->unit,
+                'description' => $product->description,
+                'is_active' => $product->is_active,
+                'active' => $product->is_active, // Alias pour compatibilité
+                'created_at' => $product->created_at,
+                'updated_at' => $product->updated_at,
+            ];
+        });
+
         return response()->json([
-            'products' => array_values($products),
-            'total' => count($products),
+            'products' => $products,
+            'total' => $products->count(),
+            'categories' => Product::getCategories(),
         ]);
     }
 
     /**
-     * Liste des catégories de produits
+     * Liste des catégories de produits depuis la base de données
      */
     public function categories(Request $request): JsonResponse
     {
-        $categories = [
-            [
-                'id' => 1,
-                'name' => 'Dairy',
-                'description' => 'Produits laitiers',
+        $categories = collect(Product::getCategories())->map(function ($label, $key) {
+            return [
+                'id' => $key,
+                'name' => $key,
+                'description' => $label,
+                'display_name' => $label,
                 'active' => true,
-            ],
-            [
-                'id' => 2,
-                'name' => 'Baby Formula',
-                'description' => 'Laits infantiles',
-                'active' => true,
-            ],
-            [
-                'id' => 3,
-                'name' => 'Beverages',
-                'description' => 'Boissons',
-                'active' => true,
-            ],
-        ];
+            ];
+        })->values();
 
         return response()->json([
             'categories' => $categories,
-            'total' => count($categories),
+            'total' => $categories->count(),
+        ]);
+    }
+
+    /**
+     * Obtenir les produits par catégorie
+     */
+    public function byCategory(Request $request): JsonResponse
+    {
+        $query = Product::where('is_active', true);
+
+        $productsByCategory = $query->get()
+            ->groupBy('category')
+            ->map(function ($products, $category) {
+                return [
+                    'category' => $category,
+                    'display_name' => Product::getCategories()[$category] ?? $category,
+                    'products' => $products->map(function ($product) {
+                        return [
+                            'id' => $product->id,
+                            'code' => $product->code,
+                            'name' => $product->name,
+                            'price' => $product->price,
+                            'unit' => $product->unit,
+                            'stock_quantity' => $product->stock_quantity,
+                            'description' => $product->description,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'categories' => $productsByCategory,
+            'total_categories' => $productsByCategory->count(),
+            'total_products' => $query->count(),
         ]);
     }
 

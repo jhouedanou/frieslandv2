@@ -57,4 +57,11 @@ Route::middleware(['auth:sanctum'])->prefix('api')->group(function () {
     
     // Routes géofencing selon CLAUDE.md - validation 300m obligatoire
     Route::post('geofences/validate', [\App\Http\Controllers\Api\GeofenceController::class, 'validate']);
+    
+    // Products endpoints pour les vrais produits depuis Filament
+    Route::get('products', [\App\Http\Controllers\Api\ProductController::class, 'index']); // Liste des produits
+    Route::get('products/categories', [\App\Http\Controllers\Api\ProductController::class, 'categories']); // Catégories
+    Route::get('products/by-category', [\App\Http\Controllers\Api\ProductController::class, 'byCategory']); // Produits par catégorie
+    Route::post('products/verify', [\App\Http\Controllers\Api\ProductController::class, 'verify']); // Vérifier présence produit
+    Route::get('products/visit/{visiteId}', [\App\Http\Controllers\Api\ProductController::class, 'getForVisit']); // Produits pour une visite
 }); 

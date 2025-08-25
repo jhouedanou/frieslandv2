@@ -27,8 +27,27 @@ class _MapPageState extends State<MapPage> {
 
   // Mock data - Replace with actual data from repository
   final List<PDV> _mockPDVs = [
+    // Test PDV for demo in Treichville
     PDV(
       pdvId: '1',
+      nomPdv: 'Superette Treichville Test',
+      canal: 'General trade',
+      categoriePdv: 'Point de vente détail',
+      sousCategoriePdv: 'Superette',
+      region: 'Abidjan',
+      territoire: 'Abidjan Sud',
+      zone: 'Treichville',
+      secteur: 'Secteur Test',
+      latitude: 5.295058048126565,
+      longitude: -3.99666888923755,
+      rayonGeofence: 30.0,
+      adressage: 'Treichville, Abidjan',
+      dateCreation: DateTime.now(),
+      ajoutePar: 'Admin',
+      mdm: 'MDM001',
+    ),
+    PDV(
+      pdvId: '2',
       nomPdv: 'Boutique Central',
       canal: 'General trade',
       categoriePdv: 'Point de vente détail',
@@ -39,13 +58,14 @@ class _MapPageState extends State<MapPage> {
       secteur: 'Secteur A',
       latitude: 5.3600,
       longitude: -4.0083,
+      rayonGeofence: 30.0,
       adressage: 'Plateau, Abidjan',
       dateCreation: DateTime.now(),
       ajoutePar: 'Admin',
-      mdm: 'MDM001',
+      mdm: 'MDM002',
     ),
     PDV(
-      pdvId: '2',
+      pdvId: '3',
       nomPdv: 'Superette Nord',
       canal: 'General trade',
       categoriePdv: 'Point de vente détail',
@@ -56,10 +76,11 @@ class _MapPageState extends State<MapPage> {
       secteur: 'Secteur B',
       latitude: 6.8276,
       longitude: -5.2893,
+      rayonGeofence: 30.0,
       adressage: 'Quartier Administratif, Yamoussoukro',
       dateCreation: DateTime.now(),
       ajoutePar: 'Admin',
-      mdm: 'MDM002',
+      mdm: 'MDM003',
     ),
   ];
 
@@ -78,12 +99,12 @@ class _MapPageState extends State<MapPage> {
       if (_currentPosition != null) {
         _mapController.move(
           LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          10,
+          3,
         );
       } else if (_pdvList.isNotEmpty) {
         _mapController.move(
           LatLng(_pdvList.first.latitude, _pdvList.first.longitude),
-          10,
+          3,
         );
       }
     } catch (e) {
@@ -139,7 +160,7 @@ class _MapPageState extends State<MapPage> {
                     initialCenter: _currentPosition != null
                         ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
                         : const LatLng(5.3600, -4.0083), // Default to Abidjan
-                    initialZoom: 10,
+                    initialZoom: 3,
                     onTap: (tapPosition, point) {
                       setState(() {
                         _selectedPDV = null;

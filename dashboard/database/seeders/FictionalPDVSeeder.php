@@ -20,12 +20,12 @@ class FictionalPDVSeeder extends Seeder
             return;
         }
 
-        // PDV spécifique aux coordonnées demandées
+        // PDV spécifique aux coordonnées demandées (utilisateur: 5.295058048126565, -3.99666888923755)
         $pdvSpecifique = [
             'nom' => 'Superette Central Treichville',
             'adresse' => 'Avenue de la République, Treichville',
-            'latitude' => 5.294972583702423,
-            'longitude' => -3.996776177589156,
+            'latitude' => 5.295058048126565,
+            'longitude' => -3.99666888923755,
             'type' => 'Superette',
             'secteur' => 'TREICHVILLE',
             'zone' => 'ABIDJAN SUD',

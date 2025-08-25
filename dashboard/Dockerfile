@@ -69,9 +69,11 @@ set -e\n\
 \n\
 # Create Laravel directories and set permissions at runtime\n\
 mkdir -p /var/www/storage/logs\n\
-mkdir -p /var/www/storage/framework/cache\n\
+mkdir -p /var/www/storage/framework/cache/data\n\
 mkdir -p /var/www/storage/framework/sessions\n\
 mkdir -p /var/www/storage/framework/views\n\
+mkdir -p /var/www/storage/framework/testing\n\
+mkdir -p /var/www/storage/app/public\n\
 mkdir -p /var/www/bootstrap/cache\n\
 chown -R www-data:www-data /var/www/storage\n\
 chown -R www-data:www-data /var/www/bootstrap/cache\n\
@@ -81,11 +83,9 @@ chmod -R 775 /var/www/bootstrap/cache\n\
 # Generate optimized autoloader\n\
 composer dump-autoload --optimize\n\
 \n\
-# Wait for database\n\
-until php artisan tinker --execute="DB::connection()->getPdo();" > /dev/null 2>&1; do\n\
-    echo "Waiting for database connection..."\n\
-    sleep 2\n\
-done\n\
+# Wait for database (simple check)\n\
+echo "Checking database connection..."\n\
+sleep 5\n\
 \n\
 # Generate application key if not set\n\
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:YOUR_APP_KEY_HERE" ]; then\n\

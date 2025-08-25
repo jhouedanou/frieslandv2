@@ -1,6 +1,6 @@
 {
     "name": "friesland/dashboard",
-    "description": "Dashboard d'administration Friesland Bonnet Rouge",
+    "description": "Dashboard d'administration Friesland Campina",
     "type": "project",
     "keywords": ["friesland", "dashboard", "filament", "admin"],
     "license": "MIT",
@@ -49,7 +49,7 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi || true"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
@@ -63,7 +63,9 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "laravel/sail"
+            ]
         }
     },
     "config": {

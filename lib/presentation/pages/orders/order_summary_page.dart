@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../../../data/models/pdv_model.dart';
+import '../../../data/models/planning_visit_model.dart';
 import '../../../data/models/order_model.dart';
 
 class OrderSummaryPage extends StatefulWidget {
-  final PDV pdv;
+  final SimplePDV pdv;
   final DateTime orderDate;
   final String category;
   final List<OrderItemModel> orderItems;

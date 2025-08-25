@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../data/models/pdv_model.dart';
-import '../../data/models/visite_model.dart';
+import '../../data/models/planning_visit_model.dart';
 
 class PlanningService {
   /// Obtient le planning du jour actuel
-  static Future<List<VisiteModel>> getDayPlanning([DateTime? date]) async {
+  static Future<List<PlanningVisitModel>> getDayPlanning([DateTime? date]) async {
     final targetDate = date ?? DateTime.now();
     
     // TODO: Remplacer par un appel API réel
     // Pour l'instant, on retourne des données factices
     return [
-      VisiteModel(
+      PlanningVisitModel(
         id: 1,
         pdvId: 1,
         pdvName: 'Allassane - Treichville',
@@ -21,7 +20,7 @@ class PlanningService {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-      VisiteModel(
+      PlanningVisitModel(
         id: 2,
         pdvId: 2,
         pdvName: 'Boutique Centrale - Marcory',
@@ -32,7 +31,7 @@ class PlanningService {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-      VisiteModel(
+      PlanningVisitModel(
         id: 3,
         pdvId: 3,
         pdvName: 'Supermarché Express - Koumassi',
@@ -43,7 +42,7 @@ class PlanningService {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-      VisiteModel(
+      PlanningVisitModel(
         id: 4,
         pdvId: 4,
         pdvName: 'Épicerie du Marché - Adjamé',
@@ -58,13 +57,13 @@ class PlanningService {
   }
   
   /// Trouve le PDV le plus proche basé sur la géolocalisation
-  static Future<PDV?> findClosestPDV({
+  static Future<SimplePDV?> findClosestPDV({
     double? userLatitude,
     double? userLongitude,
   }) async {
     // TODO: Implémenter la logique de géolocalisation réelle
     // Pour l'instant, on retourne un PDV fictif
-    return PDV(
+    return SimplePDV(
       id: 1,
       nom: 'Allassane',
       adresse: 'Treichville, Abidjan',

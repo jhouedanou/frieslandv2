@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../data/models/visite_model.dart';
+import '../../data/models/planning_visit_model.dart';
 import '../../core/services/planning_service.dart';
 
 class PlanningCarousel extends StatefulWidget {
   final DateTime selectedDate;
-  final Function(VisiteModel)? onVisitTap;
+  final Function(PlanningVisitModel)? onVisitTap;
 
   const PlanningCarousel({
     super.key,
@@ -17,7 +17,7 @@ class PlanningCarousel extends StatefulWidget {
 }
 
 class _PlanningCarouselState extends State<PlanningCarousel> {
-  List<VisiteModel> _dayPlanning = [];
+  List<PlanningVisitModel> _dayPlanning = [];
   bool _isLoading = true;
 
   @override

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/kpi_card.dart';
-import '../../../data/models/pdv_model.dart';
+import '../../../data/models/planning_visit_model.dart';
 import '../../../core/services/auth_service.dart';
 import 'order_categories_page.dart';
 
@@ -13,7 +13,7 @@ class OrderMainPage extends StatefulWidget {
 }
 
 class _OrderMainPageState extends State<OrderMainPage> {
-  PDV? _selectedPDV;
+  SimplePDV? _selectedPDV;
   DateTime _orderDate = DateTime.now();
   final _dateController = TextEditingController();
 
@@ -38,14 +38,14 @@ class _OrderMainPageState extends State<OrderMainPage> {
     // TODO: Implémenter la détection automatique du PDV basée sur la géolocalisation
     // Pour l'instant, on sélectionne le premier PDV disponible
     setState(() {
-      _selectedPDV = PDV(
+      _selectedPDV = SimplePDV(
         id: 1,
         nom: 'Allassane',
         adresse: 'Treichville, Abidjan',
         latitude: 5.2555,
         longitude: -3.9595,
-        telephone: '',
-        email: '',
+        telephone: '+225 XX XX XX XX',
+        email: 'allassane@example.com',
         isActive: true,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -201,7 +201,7 @@ class _OrderMainPageState extends State<OrderMainPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<PDV>(
+                  DropdownButtonFormField<SimplePDV>(
                     value: _selectedPDV,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -226,7 +226,7 @@ class _OrderMainPageState extends State<OrderMainPage> {
                         child: Text(_selectedPDV?.nom ?? 'Allassane'),
                       ),
                     ],
-                    onChanged: (PDV? newValue) {
+                    onChanged: (SimplePDV? newValue) {
                       setState(() {
                         _selectedPDV = newValue;
                       });

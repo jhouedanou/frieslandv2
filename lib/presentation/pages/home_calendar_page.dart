@@ -5,7 +5,7 @@ import '../../core/services/auth_service.dart';
 import '../../core/services/support_service.dart';
 import '../../core/services/planning_service.dart';
 import '../../data/models/pdv_model.dart';
-import '../../data/models/visite_model.dart';
+import '../../data/models/planning_visit_model.dart';
 import '../widgets/planning_carousel.dart';
 import 'visit_creation/visit_form_page.dart';
 
@@ -90,9 +90,9 @@ class _HomeCalendarPageState extends State<HomeCalendarPage> {
     return RepaintBoundary(
       key: _screenshotKey,
       child: Scaffold(
-      body: _isLoading 
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
+        body: _isLoading 
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
               onRefresh: _loadData,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -113,6 +113,7 @@ class _HomeCalendarPageState extends State<HomeCalendarPage> {
                 ),
               ),
             ),
+      ),
     );
   }
 

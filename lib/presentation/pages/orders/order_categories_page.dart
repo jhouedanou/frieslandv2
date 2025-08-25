@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/pdv_model.dart';
+import '../../../data/models/planning_visit_model.dart';
 import '../../../data/models/product_model.dart';
 import 'order_product_page.dart';
 
 class OrderCategoriesPage extends StatefulWidget {
-  final PDV pdv;
+  final SimplePDV pdv;
   final DateTime orderDate;
 
   const OrderCategoriesPage({

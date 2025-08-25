@@ -103,3 +103,10 @@ backend/uploads/
 # Firebase
 .firebase/
 firebase-debug.log
+
+# Laravel/PHP Dashboard
+dashboard/vendor/
+dashboard/composer.lock
+dashboard/storage/logs/
+dashboard/storage/framework/
+dashboard/bootstrap/cache/

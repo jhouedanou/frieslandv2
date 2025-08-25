@@ -7,7 +7,9 @@ import 'geofence_validation_page.dart';
 // Écran 2: Sélection PDV selon CLAUDE.md
 // Permet de choisir le point de vente à visiter
 class PDVSelectionPage extends StatefulWidget {
-  const PDVSelectionPage({super.key});
+  final PDVModel? preSelectedPDV;
+  
+  const PDVSelectionPage({super.key, this.preSelectedPDV});
 
   @override
   State<PDVSelectionPage> createState() => _PDVSelectionPageState();

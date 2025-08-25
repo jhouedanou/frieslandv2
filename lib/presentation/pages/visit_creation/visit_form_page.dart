@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../../../data/models/pdv_model.dart';
 import '../../../data/models/visite_data_models.dart';
 import '../../../data/models/visite_model.dart';
@@ -9,13 +11,11 @@ import 'package:uuid/uuid.dart';
 // Écran 4: Formulaire multi-onglets selon CLAUDE.md
 // 4 sections: Général, Concurrence, Visibilité, Actions
 class VisitFormPage extends StatefulWidget {
-  final PDVModel selectedPdv;
-  final Position validatedPosition;
+  final PDVModel selectedPDV;
 
   const VisitFormPage({
     super.key,
-    required this.selectedPdv,
-    required this.validatedPosition,
+    required this.selectedPDV,
   });
 
   @override
@@ -29,6 +29,10 @@ class _VisitFormPageState extends State<VisitFormPage>
   
   int _currentTabIndex = 0;
   bool _isSaving = false;
+  
+  // Capture photo
+  final ImagePicker _picker = ImagePicker();
+  final List<File> _capturedImages = [];
   
   // Données du formulaire selon structure CLAUDE.md
   final Map<String, dynamic> _formData = {
@@ -123,7 +127,7 @@ class _VisitFormPageState extends State<VisitFormPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Visite - ${widget.selectedPdv.nomPdv}'),
+        title: Text('Visite - ${widget.selectedPDV.nomPdv}'),
         backgroundColor: const Color(0xFFE53E3E),
         foregroundColor: Colors.white,
         bottom: TabBar(
@@ -761,23 +765,133 @@ class _VisitFormPageState extends State<VisitFormPage>
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Text(
-                    'Documentation visuelle obligatoire',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.camera_alt, color: Color(0xFFE53E3E)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Documentation visuelle obligatoire',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: _capturePhoto,
-                    icon: const Icon(Icons.camera_alt),
-                    label: const Text('Prendre une photo'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
+                  
+                  // Affichage des photos capturées
+                  if (_capturedImages.isNotEmpty) ..[
+                    Container(
+                      height: 100,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _capturedImages.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            width: 100,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    _capturedImages[index],
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _capturedImages.removeAt(index);
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
+                  ],
+                  
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _capturePhoto,
+                          icon: const Icon(Icons.camera_alt),
+                          label: Text('Prendre photo (${_capturedImages.length})'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE53E3E),
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      if (_capturedImages.isNotEmpty) ..[
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _capturedImages.clear();
+                            });
+                          },
+                          icon: const Icon(Icons.delete),
+                          label: const Text('Effacer'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
+                  
+                  // Validation des photos
+                  if (_capturedImages.isEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.orange[200]!),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.warning, color: Colors.orange, size: 16),
+                          SizedBox(width: 8),
+                          Text(
+                            'Au moins une photo est requise',
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -877,11 +991,40 @@ class _VisitFormPageState extends State<VisitFormPage>
     }
   }
 
-  void _capturePhoto() {
-    // TODO: Implémenter capture photo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Capture photo à implémenter')),
-    );
+  Future<void> _capturePhoto() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 80,
+      );
+      
+      if (photo != null) {
+        final imageFile = File(photo.path);
+        setState(() {
+          _capturedImages.add(imageFile);
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Photo capturée (${_capturedImages.length})'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur capture photo: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   // Sauvegarde visite selon CLAUDE.md
@@ -891,23 +1034,45 @@ class _VisitFormPageState extends State<VisitFormPage>
     });
 
     try {
+      // Obtenir la position actuelle pour la géolocalisation
+      Position currentPosition;
+      try {
+        currentPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      } catch (e) {
+        // Position par défaut si géolocalisation échoue
+        currentPosition = Position(
+          latitude: widget.selectedPDV.latitude,
+          longitude: widget.selectedPDV.longitude,
+          timestamp: DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          altitudeAccuracy: 0,
+          headingAccuracy: 0,
+        );
+      }
+      
       // Créer le modèle VisiteModel selon CLAUDE.md
       final visite = VisiteModel(
         visiteId: const Uuid().v4(),
-        pdvId: widget.selectedPdv.pdvId,
+        pdvId: widget.selectedPDV.pdvId,
         commercial: 'Merchandiser Test', // TODO: Get from auth
         dateVisite: DateTime.now(),
         geolocation: GeolocationData(
-          lat: widget.validatedPosition.latitude,
-          lng: widget.validatedPosition.longitude,
+          lat: currentPosition.latitude,
+          lng: currentPosition.longitude,
         ),
         geofenceValidated: true,
-        precisionGps: widget.validatedPosition.accuracy,
-        produits: ProduitsData.fromJson(_formData['produits']),
-        concurrence: ConcurrenceData.fromJson(_formData['concurrence']),
-        visibilite: VisibiliteData.fromJson(_formData['visibilite']),
-        actions: ActionsData.fromJson(_formData['actions']),
-        images: [], // TODO: Add captured photos
+        precisionGps: currentPosition.accuracy,
+        produits: _convertToProduitsData(_formData['produits']),
+        concurrence: _convertToConcurrenceData(_formData['concurrence']),
+        visibilite: _convertToVisibiliteData(_formData['visibilite']),
+        actions: _convertToActionsData(_formData['actions']),
+        images: _capturedImages.map((file) => file.path).toList(),
         syncStatus: 'pending',
       );
 
@@ -941,5 +1106,98 @@ class _VisitFormPageState extends State<VisitFormPage>
         });
       }
     }
+  }
+  
+  // Méthodes de conversion pour éviter les erreurs de type
+  ProduitsData _convertToProduitsData(Map<String, dynamic> data) {
+    return ProduitsData(
+      evap: EvapData(
+        present: data['evap']['present'] ?? false,
+        brGold: data['evap']['br_gold'],
+        br150g: data['evap']['br_150g'],
+        brb150g: data['evap']['brb_150g'],
+        br380g: data['evap']['br_380g'],
+        brb380g: data['evap']['brb_380g'],
+        pearl380g: data['evap']['pearl_380g'],
+      ),
+      imp: ImpData(
+        present: data['imp']['present'] ?? false,
+        prixRespectes: data['imp']['prix_respectes'] ?? false,
+        br2: data['imp']['br_2'],
+        br16g: data['imp']['br_16g'],
+        brb16g: data['imp']['brb_16g'],
+        br360g: data['imp']['br_360g'],
+        br400gTin: data['imp']['br_400g_tin'],
+        brb360g: data['imp']['brb_360g'],
+        br900gTin: data['imp']['br_900g_tin'],
+      ),
+      scm: ScmData(
+        present: data['scm']['present'] ?? false,
+        prixRespectes: data['scm']['prix_respectes'] ?? false,
+        produits: null,
+      ),
+      uht: UhtData(
+        present: data['uht']['present'] ?? false,
+        prixRespectes: data['uht']['prix_respectes'] ?? false,
+        produits: null,
+      ),
+      yaourt: YaourtData(
+        present: data['yaourt']['present'] ?? false,
+      ),
+    );
+  }
+
+  ConcurrenceData _convertToConcurrenceData(Map<String, dynamic> data) {
+    return ConcurrenceData(
+      presenceConcurrents: data['presence_concurrents'] ?? false,
+      evap: ConcurrenceEvapData(
+        present: data['evap']['present'] ?? false,
+        cowmilk: data['evap']['cowmilk'],
+        nido150g: data['evap']['nido_150g'],
+        autre: data['evap']['autre'],
+      ),
+      imp: ConcurrenceImpData(
+        present: data['imp']['present'] ?? false,
+        nido: data['imp']['nido'],
+        laity: data['imp']['laity'],
+        autre: data['imp']['autre'],
+      ),
+      scm: ConcurrenceScmData(
+        present: data['scm']['present'] ?? false,
+        topSaho: data['scm']['top_saho'],
+        autre: data['scm']['autre'],
+        nomConcurrent: data['scm']['nom_concurrent'],
+      ),
+      uht: data['uht'] ?? false,
+    );
+  }
+
+  VisibiliteData _convertToVisibiliteData(Map<String, dynamic> data) {
+    return VisibiliteData(
+      interieure: VisibiliteInterieureData(
+        presenceVisibilite: data['interieure']['presence_visibilite'] ?? false,
+      ),
+      concurrence: VisibiliteConcurrenceData(
+        presenceVisibilite: data['concurrence']['presence_visibilite'] ?? false,
+        nidoExterieur: data['concurrence']['nido_exterieur'] ?? false,
+        nidoInterieur: data['concurrence']['nido_interieur'] ?? false,
+        laityExterieur: data['concurrence']['laity_exterieur'] ?? false,
+        laityInterieur: data['concurrence']['laity_interieur'] ?? false,
+        candiaExterieur: data['concurrence']['candia_exterieur'] ?? false,
+        candiaInterieur: data['concurrence']['candia_interieur'] ?? false,
+      ),
+    );
+  }
+
+  ActionsData _convertToActionsData(Map<String, dynamic> data) {
+    return ActionsData(
+      referencementProduits: data['referencement_produits'] ?? false,
+      executionActivitesPromotionnelles: data['execution_activites_promotionnelles'] ?? false,
+      prospectionPdv: data['prospection_pdv'] ?? false,
+      verificationFifo: data['verification_fifo'] ?? false,
+      rangementProduits: data['rangement_produits'] ?? false,
+      poseAffiches: data['pose_affiches'] ?? false,
+      poseMaterielVisibilite: data['pose_materiel_visibilite'] ?? false,
+    );
   }
 }

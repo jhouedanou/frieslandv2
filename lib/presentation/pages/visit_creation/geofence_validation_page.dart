@@ -359,8 +359,7 @@ class _GeofenceValidationPageState extends State<GeofenceValidationPage> {
       context,
       MaterialPageRoute(
         builder: (context) => VisitFormPage(
-          selectedPdv: widget.selectedPdv,
-          validatedPosition: _currentPosition!,
+          selectedPDV: widget.selectedPdv,
         ),
       ),
     );

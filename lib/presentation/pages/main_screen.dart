@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/services/auth_service.dart';
-import 'visits_list_page.dart';
+import 'home_calendar_page.dart';
 import 'map_page.dart';
-import 'pdv_management_page.dart';
+import 'pdv_list_page.dart';
 import 'profile_page.dart';
+import 'create_visit_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -27,18 +28,18 @@ class _MainScreenState extends State<MainScreen> {
 
   void _initializePages() {
     _pages = [
-      const VisitesListPage(showAppBar: false), // Page principale des visites
+      const HomeCalendarPage(), // Page principale avec calendrier et routing
       const MapPage(showAppBar: false), // Carte OpenStreetMap
-      const PDVManagementPage(), // Création de PDV
+      const PDVListPage(), // Liste et création de PDV
       const ProfilePage(), // Profil utilisateur
     ];
 
     _bottomNavItems = [
       const BottomNavigationBarItem(
-        icon: Icon(Icons.list_alt),
-        activeIcon: Icon(Icons.list_alt),
-        label: 'Visites',
-        tooltip: 'Liste des visites',
+        icon: Icon(Icons.calendar_today_outlined),
+        activeIcon: Icon(Icons.calendar_today),
+        label: 'Accueil',
+        tooltip: 'Calendrier et routing',
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.map_outlined),
@@ -47,10 +48,10 @@ class _MainScreenState extends State<MainScreen> {
         tooltip: 'Carte Treichville',
       ),
       const BottomNavigationBarItem(
-        icon: Icon(Icons.add_business_outlined),
-        activeIcon: Icon(Icons.add_business),
+        icon: Icon(Icons.store_outlined),
+        activeIcon: Icon(Icons.store),
         label: 'PDV',
-        tooltip: 'Créer un PDV',
+        tooltip: 'Gérer les PDV',
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.person_outline),
@@ -65,6 +66,15 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _currentIndex = index;
     });
+  }
+  
+  void _createNewVisit() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateVisitPage(),
+      ),
+    );
   }
 
   @override
@@ -182,6 +192,13 @@ class _MainScreenState extends State<MainScreen> {
         index: _currentIndex,
         children: _pages,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _createNewVisit,
+        backgroundColor: const Color(0xFFE53E3E),
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.add),
+        tooltip: 'Nouvelle visite',
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -194,19 +211,6 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.white,
         items: _bottomNavItems,
       ),
-      // FAB pour création rapide de visite
-      floatingActionButton: _currentIndex == 0 ? FloatingActionButton(
-        onPressed: () {
-          // Navigation vers création de visite
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Créer une nouvelle visite')),
-          );
-        },
-        backgroundColor: const Color(0xFFE53E3E),
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-        tooltip: 'Nouvelle visite',
-      ) : null,
     );
   }
 }

@@ -39,9 +39,10 @@ class _MapPageState extends State<MapPage> {
       // Charger les PDV
       final pdvs = await _syncService.getPDVsOffline();
       
-      // Filtrer sur Treichville pour la démonstration
-      final treichvillePDVs = pdvs.where((pdv) => 
-        pdv.zone.toLowerCase().contains('treichville')).toList();
+      // Afficher tous les PDVs fictifs créés (zone ABIDJAN SUD - secteur TREICHVILLE)
+      final availablePDVs = pdvs.where((pdv) => 
+        pdv.secteur.toLowerCase().contains('treichville') || 
+        pdv.zone.toLowerCase().contains('abidjan')).toList();
       
       // Obtenir la position actuelle
       try {
@@ -53,9 +54,14 @@ class _MapPageState extends State<MapPage> {
       }
 
       setState(() {
-        _pdvs = treichvillePDVs;
+        _pdvs = availablePDVs;
         _isLoading = false;
       });
+      
+      print('✅ Carte: ${availablePDVs.length} PDVs chargés');
+      for (var pdv in availablePDVs) {
+        print('📍 ${pdv.nomPdv} - ${pdv.latitude}, ${pdv.longitude}');
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -246,7 +252,7 @@ class _MapPageState extends State<MapPage> {
       _selectedPDV!.longitude,
     );
 
-    final isInGeofence = distance <= (_selectedPDV!.rayonGeofence ?? 300.0);
+    final isInGeofence = distance <= (_selectedPDV!.rayonGeofence ?? 100.0);
 
     return Row(
       children: [

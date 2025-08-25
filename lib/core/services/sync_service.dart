@@ -5,6 +5,7 @@ import '../database/app_database.dart';
 import '../../data/datasources/api_datasource.dart';
 import '../../data/models/visite_model.dart';
 import '../../data/models/pdv_model.dart';
+import '../../data/mock_pdvs.dart';
 
 class SyncService {
   static final SyncService _instance = SyncService._internal();
@@ -217,10 +218,43 @@ class SyncService {
 
   Future<List<PDVModel>> getPDVsOffline() async {
     try {
-      final pdvs = await _localDb.getPDVs();
-      return pdvs.map((data) => PDVModel.fromJson(data)).toList();
+      // Récupérer les PDVs fictifs créés pour l'utilisateur connecté
+      final fictionalPDVs = MockPDVs.getFictionalPDVs();
+      
+      // Convertir en PDVModel pour compatibilité
+      final pdvModels = fictionalPDVs.map((pdv) => PDVModel(
+        pdvId: pdv.pdvId,
+        nomPdv: pdv.nomPdv,
+        canal: pdv.canal,
+        categoriePdv: pdv.categoriePdv,
+        sousCategoriePdv: pdv.sousCategoriePdv,
+        region: pdv.region,
+        territoire: pdv.territoire,
+        zone: pdv.zone,
+        secteur: pdv.secteur,
+        latitude: pdv.latitude,
+        longitude: pdv.longitude,
+        rayonGeofence: pdv.rayonGeofence,
+        adressage: pdv.adressage,
+        dateCreation: pdv.dateCreation,
+        ajoutePar: pdv.ajoutePar,
+        mdm: pdv.mdm,
+      )).toList();
+      
+      print('✅ Chargé ${pdvModels.length} PDVs fictifs pour l\'utilisateur connecté');
+      print('🎯 PDV principal: ${pdvModels.first.nomPdv}');
+      print('📍 Coordonnées exactes: ${pdvModels.first.latitude}, ${pdvModels.first.longitude}');
+      
+      return pdvModels;
     } catch (e) {
-      throw Exception('Erreur récupération PDV locaux: $e');
+      print('Erreur getPDVsOffline: $e');
+      // Fallback - essayer la base locale
+      try {
+        final pdvs = await _localDb.getPDVs();
+        return pdvs.map((data) => PDVModel.fromJson(data)).toList();
+      } catch (e2) {
+        throw Exception('Erreur récupération PDV locaux: $e2');
+      }
     }
   }
 

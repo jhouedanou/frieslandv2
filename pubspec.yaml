@@ -68,11 +68,11 @@ dependencies:
   intl: ^0.20.2
   uuid: ^4.5.1
   crypto: ^3.0.5
+  table_calendar: ^3.0.9
   convert: ^3.1.1
   collection: ^1.18.0
 
   # Date et Temps - Updated
-  table_calendar: ^3.1.2
 
   # Formulaires et Validation - Updated
   reactive_forms: ^16.1.1

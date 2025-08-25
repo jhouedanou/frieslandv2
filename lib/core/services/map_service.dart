@@ -12,7 +12,7 @@ class MapService {
   // Centre par défaut sur Treichville selon demandes utilisateur
   static const LatLng _defaultCenter = LatLng(5.2500, -4.0235); // Rue Roger Abinader
   static const double _defaultZoom = 15.0;
-  static const double _geofenceRadius = 300.0; // 300m selon CLAUDE.md
+  static const double _geofenceRadius = 100.0; // 100m selon demande utilisateur
 
   // Créer une carte OpenStreetMap centrée sur Treichville
   static Widget createTreichvilleMap({
@@ -71,11 +71,7 @@ class MapService {
             markers: [_createCurrentPositionMarker(currentPosition)],
           ),
 
-        // Couche géofencing si activée
-        if (showGeofencing)
-          CircleLayer(
-            circles: pdvs.map((pdv) => _createGeofenceCircle(pdv)).toList(),
-          ),
+        // Couche géofencing retirée selon demande utilisateur
       ],
     );
   }
@@ -149,16 +145,7 @@ class MapService {
     );
   }
 
-  // Créer un cercle de géofencing selon CLAUDE.md (300m)
-  static CircleMarker _createGeofenceCircle(PDVModel pdv) {
-    return CircleMarker(
-      point: LatLng(pdv.latitude, pdv.longitude),
-      radius: pdv.rayonGeofence ?? _geofenceRadius,
-      color: const Color(0xFFE53E3E).withOpacity(0.2),
-      borderColor: const Color(0xFFE53E3E),
-      borderStrokeWidth: 2.0,
-    );
-  }
+  // Méthode _createGeofenceCircle retirée selon demande utilisateur
 
   // Trouver le PDV le plus proche d'un point
   static PDVModel? _findNearestPDV(LatLng point, List<PDVModel> pdvs) {

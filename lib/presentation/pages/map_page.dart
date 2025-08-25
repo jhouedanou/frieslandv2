@@ -8,7 +8,9 @@ import 'visit_creation/geofence_validation_page.dart';
 
 // Page de carte interactive avec OpenStreetMap pour Treichville
 class MapPage extends StatefulWidget {
-  const MapPage({super.key});
+  final bool showAppBar;
+  
+  const MapPage({super.key, this.showAppBar = true});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -67,7 +69,7 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.showAppBar ? AppBar(
         title: const Text('Carte Treichville - Roger Abinader'),
         backgroundColor: const Color(0xFFE53E3E),
         foregroundColor: Colors.white,
@@ -87,7 +89,7 @@ class _MapPageState extends State<MapPage> {
             tooltip: 'Ma position',
           ),
         ],
-      ),
+      ) : null,
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator())
           : Column(

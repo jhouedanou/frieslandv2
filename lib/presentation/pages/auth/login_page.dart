@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
-import '../visits_list_page.dart';
+import '../main_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -390,7 +390,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const VisitesListPage(),
+            pageBuilder: (context, animation, secondaryAnimation) => const MainScreen(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
             },

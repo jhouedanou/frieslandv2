@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'presentation/pages/visits_list_page.dart';
 import 'presentation/pages/auth/login_page.dart';
+import 'presentation/pages/main_screen.dart';
 import 'core/services/auth_service.dart';
 
 void main() {
@@ -89,7 +89,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       return const SplashScreen();
     }
 
-    return _isAuthenticated ? const VisitesListPage() : const LoginPage();
+    return _isAuthenticated ? const MainScreen() : const LoginPage();
   }
 }
 

@@ -157,19 +157,22 @@ class _PDVManagementPageState extends State<PDVManagementPage> {
     try {
       // Créer le modèle PDV
       final pdv = PDVModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        nom: _nomController.text.trim(),
-        adresse: _adresseController.text.trim(),
+        pdvId: DateTime.now().millisecondsSinceEpoch.toString(),
+        nomPdv: _nomController.text.trim(),
+        canal: 'Moderne',
+        categoriePdv: _selectedType,
+        sousCategoriePdv: _selectedType,
+        region: 'ABIDJAN',
+        territoire: 'ABIDJAN SUD',
+        zone: _authService.userZone ?? 'ABIDJAN SUD',
+        secteur: _authService.userSecteurs?.first ?? 'TREICHVILLE',
         latitude: _currentPosition!.latitude,
         longitude: _currentPosition!.longitude,
-        type: _selectedType,
-        telephone: _telephoneController.text.trim(),
-        contactPrincipal: _contactController.text.trim(),
-        secteur: _authService.userSecteurs?.first ?? 'NON_DEFINI',
-        zone: _authService.userZone ?? 'NON_DEFINIE',
-        horairesOuverture: _getDefaultSchedule(),
-        rayonGeofence: 300, // 300m par défaut selon CLAUDE.md
-        isActive: true,
+        rayonGeofence: 300.0, // 300m par défaut selon CLAUDE.md
+        adressage: _adresseController.text.trim(),
+        dateCreation: DateTime.now(),
+        ajoutePar: _authService.currentUser?['email'] ?? 'user',
+        mdm: 'FR_' + DateTime.now().millisecondsSinceEpoch.toString(),
       );
 
       // TODO: Intégrer avec l'API backend pour sauvegarder
@@ -179,7 +182,7 @@ class _PDVManagementPageState extends State<PDVManagementPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('PDV "${pdv.nom}" créé avec succès !'),
+            content: Text('PDV "${pdv.nomPdv}" créé avec succès !'),
             backgroundColor: Colors.green,
           ),
         );

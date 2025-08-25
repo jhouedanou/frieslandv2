@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../data/models/visite_model.dart';
 import '../../core/services/sync_service.dart';
 import '../../core/services/auth_service.dart';
@@ -10,7 +9,9 @@ import 'auth/login_page.dart';
 // Écran d'accueil de l'app de terrain selon CLAUDE.md
 // Structure: Liste vide avec bouton "+" (nouvelle visite)
 class VisitesListPage extends StatefulWidget {
-  const VisitesListPage({super.key});
+  final bool showAppBar;
+  
+  const VisitesListPage({super.key, this.showAppBar = true});
 
   @override
   State<VisitesListPage> createState() => _VisitesListPageState();
@@ -70,7 +71,7 @@ class _VisitesListPageState extends State<VisitesListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: widget.showAppBar ? AppBar(
         title: Row(
           children: [
             Image.asset(

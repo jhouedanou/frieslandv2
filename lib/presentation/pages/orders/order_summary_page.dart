@@ -251,6 +251,147 @@ class _OrderSummaryPageState extends State<OrderSummaryPage> {
 
             const SizedBox(height: 24),
 
+            // Liste des produits commandés
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'PRODUITS COMMANDÉS',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFE53E3E),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (widget.orderItems.isNotEmpty) ...[
+                    // Table header
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        children: [
+                          Expanded(flex: 3, child: Text('Produit', style: TextStyle(fontWeight: FontWeight.bold))),
+                          Expanded(flex: 1, child: Text('Qté', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center)),
+                          Expanded(flex: 2, child: Text('Prix unit.', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+                          Expanded(flex: 2, child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Order items
+                    ...widget.orderItems.map((item) => Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey[200]!),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3, 
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.product.name,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                if (item.product.code.isNotEmpty)
+                                  Text(
+                                    item.product.code,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              item.quantity.toString(),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              '${item.unitPrice.toInt()} F',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              '${item.totalPrice.toInt()} F',
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFE53E3E),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+                  ] else ...[
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.shopping_cart_outlined,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Aucun produit commandé',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
             // Totaux
             Container(
               width: double.infinity,

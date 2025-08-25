@@ -26,13 +26,13 @@ class DatabaseSeeder extends Seeder
         $this->call(TestDataSeeder::class);
         $this->command->info('✅ Utilisateur test et PDV Treichville créés');
 
-        // 4. Système de routing optimisé
-        $this->call(RoutingSeeder::class);
-        $this->command->info('✅ Système de routing configuré');
+        // 4. Système de routing optimisé (temporairement désactivé)
+        // $this->call(RoutingSeeder::class);
+        // $this->command->info('✅ Système de routing configuré');
 
-        // 5. PDVs fictifs avec coordonnées spécifiques
-        $this->call(FictionalPDVSeeder::class);
-        $this->command->info('✅ PDVs fictifs créés avec coordonnées demandées');
+        // 5. PDVs fictifs avec coordonnées spécifiques (temporairement désactivé)
+        // $this->call(FictionalPDVSeeder::class);
+        // $this->command->info('✅ PDVs fictifs créés avec coordonnées demandées');
 
         $this->command->info('');
         $this->command->info('🎉 Base de données initialisée avec succès !');

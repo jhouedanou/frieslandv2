@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
 class PDV extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
     protected $table = 'pdvs';
 

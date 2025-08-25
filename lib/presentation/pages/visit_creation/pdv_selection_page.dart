@@ -24,6 +24,7 @@ class _PDVSelectionPageState extends State<PDVSelectionPage> {
   bool _isLoading = true;
   Position? _currentPosition;
   String? _selectedSortOption = 'distance';
+  String? _selectedFilterOption = 'all';
 
   @override
   void initState() {
@@ -90,18 +91,55 @@ class _PDVSelectionPageState extends State<PDVSelectionPage> {
 
   void _filterPDVs(String query) {
     setState(() {
-      if (query.isEmpty) {
-        _filteredPdvs = _pdvs;
-      } else {
-        _filteredPdvs = _pdvs.where((pdv) {
+      List<PDVModel> tempFiltered = _pdvs;
+      
+      // Filtre par recherche
+      if (query.isNotEmpty) {
+        tempFiltered = tempFiltered.where((pdv) {
           return pdv.nomPdv.toLowerCase().contains(query.toLowerCase()) ||
                  pdv.canal.toLowerCase().contains(query.toLowerCase()) ||
                  pdv.zone.toLowerCase().contains(query.toLowerCase()) ||
                  pdv.secteur.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
+      
+      // Filtre par disponibilité
+      _filteredPdvs = _applyAvailabilityFilter(tempFiltered);
       _sortPDVs();
     });
+  }
+  
+  List<PDVModel> _applyAvailabilityFilter(List<PDVModel> pdvs) {
+    if (_currentPosition == null) return pdvs;
+    
+    switch (_selectedFilterOption) {
+      case 'available':
+        return pdvs.where((pdv) {
+          final distance = _calculateDistance(pdv);
+          return distance <= (pdv.rayonGeofence ?? 300.0);
+        }).toList();
+      case 'nearby':
+        return pdvs.where((pdv) {
+          final distance = _calculateDistance(pdv);
+          return distance <= 1000; // Dans un rayon de 1km
+        }).toList();
+      case 'visited_today':
+        // Filtrer les PDV déjà visités aujourd'hui (simulé)
+        final now = DateTime.now();
+        return pdvs.where((pdv) {
+          // Simuler avec l'ID du PDV pour la démo
+          return (pdv.pdvId.hashCode % 3) != 0;
+        }).toList();
+      case 'not_visited':
+        // Filtrer les PDV non visités aujourd'hui (simulé)
+        final now = DateTime.now();
+        return pdvs.where((pdv) {
+          // Simuler avec l'ID du PDV pour la démo
+          return (pdv.pdvId.hashCode % 4) == 0;
+        }).toList();
+      default:
+        return pdvs;
+    }
   }
 
   void _sortPDVs() {
@@ -146,6 +184,21 @@ class _PDVSelectionPageState extends State<PDVSelectionPage> {
     );
   }
 
+  String _getFilterLabel(String filter) {
+    switch (filter) {
+      case 'available':
+        return 'Zone géofencing';
+      case 'nearby':
+        return 'Proximité';
+      case 'visited_today':
+        return 'Visités aujourd\'hui';
+      case 'not_visited':
+        return 'Non visités';
+      default:
+        return 'Tous';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -154,6 +207,40 @@ class _PDVSelectionPageState extends State<PDVSelectionPage> {
         backgroundColor: const Color(0xFFE53E3E),
         foregroundColor: Colors.white,
         actions: [
+          // Filtre de disponibilité
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.filter_list),
+            initialValue: _selectedFilterOption,
+            onSelected: (value) {
+              setState(() {
+                _selectedFilterOption = value;
+              });
+              _filterPDVs(_searchController.text);
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'all',
+                child: Text('Tous les PDV'),
+              ),
+              const PopupMenuItem(
+                value: 'available',
+                child: Text('Dans la zone de géofencing'),
+              ),
+              const PopupMenuItem(
+                value: 'nearby',
+                child: Text('À proximité (< 1km)'),
+              ),
+              const PopupMenuItem(
+                value: 'visited_today',
+                child: Text('Visités aujourd\'hui'),
+              ),
+              const PopupMenuItem(
+                value: 'not_visited',
+                child: Text('Non visités'),
+              ),
+            ],
+          ),
+          // Tri
           PopupMenuButton<String>(
             icon: const Icon(Icons.sort),
             initialValue: _selectedSortOption,
@@ -200,7 +287,7 @@ class _PDVSelectionPageState extends State<PDVSelectionPage> {
             ),
           ),
           
-          // Statistiques
+          // Statistiques et filtre actuel
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.all(12),
@@ -208,21 +295,49 @@ class _PDVSelectionPageState extends State<PDVSelectionPage> {
               color: Colors.blue[50],
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            child: Column(
               children: [
-                Text(
-                  '${_filteredPdvs.length} PDV trouvés',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                if (_currentPosition != null)
-                  Text(
-                    'Position: ${_currentPosition!.latitude.toStringAsFixed(4)}, ${_currentPosition!.longitude.toStringAsFixed(4)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${_filteredPdvs.length} PDV trouvés',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
+                    if (_selectedFilterOption != 'all')
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE53E3E).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          _getFilterLabel(_selectedFilterOption!),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFFE53E3E),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                if (_currentPosition != null) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.my_location, size: 16, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Ma position: ${_currentPosition!.latitude.toStringAsFixed(4)}, ${_currentPosition!.longitude.toStringAsFixed(4)}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
+                ],
               ],
             ),
           ),

@@ -36,8 +36,6 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
-                Widgets\StatsOverview::class,
-                Widgets\LatestVisits::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -54,7 +52,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->brandName('Friesland Dashboard')
-            ->brandLogo(asset('images/logo.png'))
+            ->brandLogo(asset('images/logo.svg'))
             ->favicon(asset('favicon.ico'))
             ->navigationGroups([
                 'Gestion Commerciale',

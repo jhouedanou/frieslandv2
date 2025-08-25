@@ -116,8 +116,22 @@ class _HomeCalendarPageState extends State<HomeCalendarPage> {
                     // Résumé du jour sélectionné
                     _buildDaySummary(),
                     
-                    // Liste des PDVs à visiter aujourd'hui (en haut)
-                    _buildTodayPDVList(),
+                    // Planning Carousel
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: PlanningCarousel(
+                        selectedDate: _selectedDay,
+                        onVisitTap: (visit) {
+                          // Naviguer vers la page de détail de la visite ou démarrer une visite
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Visite sélectionnée: ${visit.pdvName}'),
+                              backgroundColor: const Color(0xFFE53E3E),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                     
                     // Calendrier (en bas)
                     _buildCalendar(),

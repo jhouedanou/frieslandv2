@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::table('geofence_zones', function (Blueprint $table) {
+            $table->dropForeign(['pdv_id']);
+        });
+        
         Schema::dropIfExists('pdvs');
         
         Schema::create('pdvs', function (Blueprint $table) {

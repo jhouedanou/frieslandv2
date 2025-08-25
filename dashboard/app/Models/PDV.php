@@ -25,7 +25,7 @@ class PDV extends Model
         'zone',
         'secteur',
         'geolocation', // lat/lng
-        'rayon_geofence', // default 300m
+        'rayon_geofence', // default 30m
         'adressage',
         'image',
         'date_creation',
@@ -55,11 +55,11 @@ class PDV extends Model
         return $this->geolocation['lng'] ?? 0.0;
     }
 
-    // Géofencing validation selon CLAUDE.md - 300m par défaut
+    // Géofencing validation selon CLAUDE.md - 30m par défaut
     public function isWithinGeofence($lat, $lng): bool
     {
         $distance = $this->getDistanceFrom($lat, $lng);
-        return $distance <= ($this->rayon_geofence ?? 300.0);
+        return $distance <= ($this->rayon_geofence ?? 30.0);
     }
 
     public function getDistanceFrom($lat, $lng): float

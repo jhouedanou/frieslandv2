@@ -57,7 +57,7 @@ class SettingsService {
   }
 
   // Geofence Settings
-  double get geofenceRadius => _prefs?.getDouble('geofenceRadius') ?? 100.0; // meters
+  double get geofenceRadius => _prefs?.getDouble('geofenceRadius') ?? 30.0; // meters
   set geofenceRadius(double value) {
     _prefs?.setDouble('geofenceRadius', value);
     _notifyListeners();

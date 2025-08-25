@@ -63,6 +63,7 @@ services:
       retries: 5
     command: >
       sh -c "
+        composer dump-autoload --optimize &&
         php artisan key:generate --force &&
         php artisan config:cache &&
         php artisan migrate --force &&

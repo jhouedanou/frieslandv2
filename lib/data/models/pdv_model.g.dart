@@ -19,7 +19,7 @@ PDVModel _$PDVModelFromJson(Map<String, dynamic> json) => PDVModel(
       secteur: json['secteur'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      rayonGeofence: (json['rayonGeofence'] as num?)?.toDouble() ?? 300.0,
+      rayonGeofence: (json['rayonGeofence'] as num?)?.toDouble() ?? 30.0,
       adressage: json['adressage'] as String,
       imagePath: json['imagePath'] as String?,
       dateCreation: DateTime.parse(json['dateCreation'] as String),

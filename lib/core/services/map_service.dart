@@ -11,8 +11,8 @@ class MapService {
   
   // Centre par défaut sur Treichville selon demandes utilisateur
   static const LatLng _defaultCenter = LatLng(5.2500, -4.0235); // Rue Roger Abinader
-  static const double _defaultZoom = 15.0;
-  static const double _geofenceRadius = 100.0; // 100m selon demande utilisateur
+  static const double _defaultZoom = 10.0;
+  static const double _geofenceRadius = 30.0; // 30m selon demande utilisateur
 
   // Créer une carte OpenStreetMap centrée sur Treichville
   static Widget createTreichvilleMap({

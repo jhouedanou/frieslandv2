@@ -78,12 +78,12 @@ class _MapPageState extends State<MapPage> {
       if (_currentPosition != null) {
         _mapController.move(
           LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-          15,
+          10,
         );
       } else if (_pdvList.isNotEmpty) {
         _mapController.move(
           LatLng(_pdvList.first.latitude, _pdvList.first.longitude),
-          12,
+          10,
         );
       }
     } catch (e) {
@@ -139,7 +139,7 @@ class _MapPageState extends State<MapPage> {
                     initialCenter: _currentPosition != null
                         ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
                         : const LatLng(5.3600, -4.0083), // Default to Abidjan
-                    initialZoom: 12,
+                    initialZoom: 10,
                     onTap: (tapPosition, point) {
                       setState(() {
                         _selectedPDV = null;

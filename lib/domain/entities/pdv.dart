@@ -33,7 +33,7 @@ class PDV extends Equatable {
     required this.secteur,
     required this.latitude,
     required this.longitude,
-    this.rayonGeofence = 300.0,
+    this.rayonGeofence = 30.0,
     required this.adressage,
     this.imagePath,
     required this.dateCreation,

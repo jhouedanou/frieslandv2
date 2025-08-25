@@ -25,7 +25,7 @@ module.exports = (sequelize) => {
     },
     rayon_buffer: {
       type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 300.0
+      defaultValue: 30.0
     },
     actif: {
       type: DataTypes.BOOLEAN,

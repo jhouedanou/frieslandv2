@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
-            $table->integer('radius')->default(100); // Rayon en mètres
+            $table->integer('radius')->default(30); // Rayon en mètres
             $table->boolean('is_active')->default(true);
             $table->text('description')->nullable();
             $table->timestamps();

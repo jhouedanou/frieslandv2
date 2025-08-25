@@ -29,8 +29,8 @@ WORKDIR /var/www
 # Copy composer files first for better layer caching
 COPY composer.json composer.lock ./
 
-# Install PHP dependencies
-RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader
+# Install PHP dependencies (include dev for proper package discovery)
+RUN composer install --no-scripts --no-autoloader --optimize-autoloader
 
 # Copy package.json for Node dependencies (if exists)
 COPY package*.json ./
@@ -52,8 +52,8 @@ RUN mkdir -p /var/www/storage/logs \
     && mkdir -p /var/www/storage/framework/views \
     && mkdir -p /var/www/bootstrap/cache \
     && chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage \
-    && chmod -R 755 /var/www/bootstrap/cache
+    && chmod -R 775 /var/www/storage \
+    && chmod -R 775 /var/www/bootstrap/cache
 
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/sites-available/default
@@ -67,8 +67,19 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
+# Create Laravel directories and set permissions at runtime\n\
+mkdir -p /var/www/storage/logs\n\
+mkdir -p /var/www/storage/framework/cache\n\
+mkdir -p /var/www/storage/framework/sessions\n\
+mkdir -p /var/www/storage/framework/views\n\
+mkdir -p /var/www/bootstrap/cache\n\
+chown -R www-data:www-data /var/www/storage\n\
+chown -R www-data:www-data /var/www/bootstrap/cache\n\
+chmod -R 775 /var/www/storage\n\
+chmod -R 775 /var/www/bootstrap/cache\n\
+\n\
 # Generate optimized autoloader\n\
-composer dump-autoload --no-dev --optimize\n\
+composer dump-autoload --optimize\n\
 \n\
 # Wait for database\n\
 until php artisan tinker --execute="DB::connection()->getPdo();" > /dev/null 2>&1; do\n\
